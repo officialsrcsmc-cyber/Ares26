@@ -1,0 +1,29 @@
+:root{color-scheme:light;--bg:#ffffff;--fg:#1d1228;--mut:#6b6078;--p:#4a2370;--p2:#8b5fbf;--p3:#efe8f7;--card:#fff;--bd:#ddd2ea;--on:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Inter,system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+h1,h2,h3{font-family:Lora,Georgia,serif;line-height:1.2;margin:0 0 .5em;color:var(--fg)}h1{font-size:2.3rem}h2{font-size:1.7rem}h3{font-size:1.15rem}
+.w{max-width:960px;margin:0 auto;padding:0 20px}.sec{padding:44px 0}.mut{color:var(--mut)}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--bd);z-index:11}
+.hd{display:flex;align-items:center;gap:12px;height:60px}.hd img{height:42px;background:#fff;border-radius:6px;cursor:pointer}.sp{flex:1}
+nav{display:none;gap:4px}nav a{padding:6px 10px;cursor:pointer;font-size:.92rem;color:var(--mut);border-radius:6px}nav a.on,nav a:hover{color:var(--p);background:var(--p3)}
+.mn{display:flex;flex-direction:column;padding:8px 20px 14px;border-top:1px solid var(--bd)}.mn a{padding:10px 0;cursor:pointer;border-bottom:1px solid var(--bd)}
+@media(min-width:860px){nav{display:flex}.bg{display:none}.mn{display:none}h1{font-size:3.2rem}}
+.btn{background:var(--p);color:var(--on);border:1px solid var(--p);padding:10px 18px;font:600 .9rem Inter;cursor:pointer;border-radius:4px}.btn.o{background:none;color:var(--p)}.btn.s{padding:6px 12px;font-size:.8rem}.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--p2);outline-offset:2px}
+.hero{background:#4a2370;color:#fff;padding:48px 0}.hero h1,.hero .mut{color:#fff}.hero p{color:#e4d8f3;max-width:560px}.hero .btn{background:#fff;color:#4a2370;border-color:#fff}.hero .btn.o{background:none;color:#fff}
+.hero .lg{background:#fff;border-radius:10px;padding:8px;width:170px;margin-bottom:22px}.hero .lg img{width:100%;display:block}
+.g{display:grid;gap:14px}@media(min-width:700px){.g.c3{grid-template-columns:repeat(3,1fr)}.g.c2{grid-template-columns:1fr 1fr}.g.c5{grid-template-columns:repeat(5,1fr)}}
+.card{background:var(--card);border:1px solid var(--bd);padding:20px}.card.k{border-left:4px solid var(--p2)}
+.dt{display:flex;justify-content:space-between;font-size:.8rem;letter-spacing:.06em;color:var(--mut)}.dt b{color:var(--p);font-size:1rem;letter-spacing:0}
+.q{background:var(--p3);padding:40px 0;text-align:center}.q p{font:600 1.4rem/1.4 Lora,serif;max-width:640px;margin:0 auto 10px}
+.av{width:64px;height:64px;border-radius:50%;background:var(--p3);color:var(--p);display:grid;place-items:center;font:700 1.2rem Lora;margin-bottom:10px}
+details{border-bottom:1px solid var(--bd);padding:14px 0}summary{cursor:pointer;font-weight:600}details p{margin:.6em 0 0;color:var(--mut)}
+label{display:block;font-size:.85rem;font-weight:500;margin-bottom:12px}input,select,textarea{width:100%;margin-top:4px;padding:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font:inherit;border-radius:4px}
+.st{display:flex;gap:6px;margin-bottom:18px}.st i{flex:1;height:5px;background:var(--bd);border-radius:3px}.st i.on{background:var(--p2)}
+.err{color:#c0392b;font-size:.9rem;margin:8px 0}.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:600;background:var(--p3);color:var(--p)}.badge.Approved,.badge.Accepted{background:#d7f0dd;color:#14612a}.badge.Rejected{background:#f8d9d6;color:#9b2318}
+.ov{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.85rem}td,th{border-bottom:1px solid var(--bd);padding:8px;text-align:left;vertical-align:top}
+footer{border-top:1px solid var(--bd);padding:24px 0;font-size:.85rem;color:var(--mut)}footer a{cursor:pointer;color:var(--p);margin-right:14px}
+
+.ok{color:#2e7d32;background:#eef7ee;border:1px solid #cfe6cf;padding:8px 12px;font-size:.9rem;margin:8px 0}
+.badge.UnderReview{background:#fff4d6;color:#8a6100}.badge.Submitted,.badge.Pending{background:var(--p3);color:var(--p)}
+button:disabled{opacity:.6;cursor:wait}

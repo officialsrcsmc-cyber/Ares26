@@ -1,0 +1,43 @@
+:root{color-scheme:light;--bg:#ffffff;--fg:#1d1228;--mut:#6b6078;--p:#4a2370;--p2:#8b5fbf;--p3:#efe8f7;--card:#fff;--bd:#ddd2ea;--on:#fff;box-sizing:border-box}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Inter,system-ui,sans-serif}
+h1,h2,h3{font-family:Lora,Georgia,serif;line-height:1.2;margin:0 0 .5em;color:var(--fg)}
+h1{font-size:2.6rem}h2{font-size:1.7rem}h3{font-size:1.1rem}
+.w{max-width:960px;margin:0 auto;padding:0 20px}
+.sec{padding:44px 0}
+.mut{color:var(--mut)}
+
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--bd);z-index:11}
+.hd{display:flex;align-items:center;gap:12px;height:64px}
+.hd .logo{height:44px;cursor:pointer}
+.sp{flex:1}
+nav{display:none;gap:6px}
+nav a{padding:6px 10px;cursor:pointer;font-size:.92rem;color:var(--mut);border-radius:6px;text-decoration:none}
+nav a:hover{color:var(--p);background:var(--p3)}
+nav a.on{color:var(--on);background:var(--p)}
+@media(min-width:760px){nav{display:flex}}
+
+.hero{background:var(--p3);text-align:center;padding:56px 0 48px}
+.hero-logo{width:150px;margin-bottom:18px}
+.hero h1{font-size:3rem;color:var(--p);margin-bottom:.1em}
+.hero .tag{font-weight:600;color:var(--p2);margin:0 0 .8em}
+.hero .lead{max-width:600px;margin:0 auto}
+
+.ares-box{display:flex;flex-wrap:wrap;align-items:center;gap:20px;justify-content:space-between;background:var(--p);color:#fff;border-radius:10px;padding:32px;margin-top:8px}
+.ares-box h2{color:#fff;margin-bottom:.3em}
+.ares-box p.mut{color:#e4d8f3}
+.ares-box .badge{display:inline-block;background:rgba(255,255,255,.15);color:#fff;font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:12px;margin-bottom:10px}
+.ares-box .btn{background:#fff;color:var(--p);border:1px solid #fff;flex-shrink:0}
+.ares-box-text{max-width:600px}
+
+.btn{display:inline-block;background:var(--p);color:var(--on);border:1px solid var(--p);padding:12px 22px;font:600 .95rem Inter;cursor:pointer;border-radius:4px;text-decoration:none}
+
+.card{background:var(--card);border:1px solid var(--bd);padding:22px;border-radius:6px}
+
+footer{border-top:1px solid var(--bd);padding:36px 0 18px;font-size:.9rem}
+.ft{display:grid;gap:24px}
+@media(min-width:700px){.ft{grid-template-columns:repeat(3,1fr)}}
+.ft h3{font-size:1rem;margin-bottom:.6em}
+.ft p{margin:.3em 0}
+.ft a{color:var(--p);text-decoration:none}
+.ft-bottom{margin-top:26px;padding-top:16px;border-top:1px solid var(--bd);font-size:.8rem;text-align:center}
