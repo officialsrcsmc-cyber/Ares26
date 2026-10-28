@@ -48,4 +48,10 @@ return h`<div><header><div class="w hd"><img src=${LOGO} alt="ARES’26" onClick
 <button class="btn s" onClick=${()=>go("register")}>Register now</button><button class="btn o s bg" aria-label="Menu" onClick=${()=>setMenu(!menu)}>${menu?"Close":"Menu"}</button></div>
 ${menu&&h`<div class="mn">${NAV.map(([k,l])=>h`<a key=${k} onClick=${()=>go(k)}>${l}</a>`)}</div>`}</header>
 ${sb?h`<${Page} ...${P}/>`:h`<${Setup}/>`}
-<footer><div class="w"><a onClick=${()=>go("terms")}>Terms of use</a><a onClick=${()=>go("conduct")}>Code of conduct</a><div style="margin-top:8px">ARES’26 · Research Cell SMC and Student Research Committee (SRC-SMC) · Sargodha Medical College</div></div></footer></div>`}
+<footer><div class="w ft">
+<div class="ft-col"><h3>Contact</h3><p class="mut">Email: official.srcsmc@gmail.com</p><p class="mut">Phone: (048) 9232004</p><p class="mut">Address: 2P3F+H7J, Faisalabad Rd, Sargodha</p></div>
+<div class="ft-col"><h3>ARES'26</h3><p class="mut">Academic Research &amp; Excellence Symposium, organised by the Student Research Committee (SRC) at Sargodha Medical College.</p></div>
+<div class="ft-col"><h3>Quick Links</h3><p><a onClick=${()=>go("home")}>Home</a></p><p><a onClick=${()=>go("register")}>Register</a></p><p><a onClick=${()=>go("abstracts")}>Submit abstract</a></p><p><a onClick=${()=>go("terms")}>Terms of use</a></p><p><a onClick=${()=>go("conduct")}>Code of conduct</a></p><p><a href="/">← Back to SRC</a></p></div>
+</div>
+<div class="w ft-bottom mut">© 2026 SRC – Sargodha Medical College. All rights reserved.</div>
+</footer></div>`}
