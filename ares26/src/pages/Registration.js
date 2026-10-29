@@ -25,13 +25,14 @@ const submit=async()=>{
  if(data.session)return go("dashboard");
  setSent(true)};
 
-if(sent)return h`<div class="w sec" style="max-width:560px"><h2>Check your email</h2><div class="card k"><p style="margin:0">We sent a confirmation link to <b>${f.email}</b>. Open it to activate your account, then log in to upload your payment proof and finish your registration.</p></div><p class="mut">Nothing there after a few minutes? Check your spam folder.</p><button class="btn" onClick=${()=>go("login")}>Go to log in</button></div>`;
+if(sent)return h`<div class="auth wide"><h2>Check your email</h2><p class="sub">One more step to activate your account.</p><div class="panel"><p style="margin:0 0 12px">We sent a confirmation link to <b>${f.email}</b>. Open it to activate your account, then log in to upload your payment proof and finish your registration.</p><p class="fine">Nothing there after a few minutes? Check your spam folder.</p><button class="btn block" onClick=${()=>go("login")}>Go to log in</button></div></div>`;
 
-return h`<div class="w sec" style="max-width:560px"><h2>Registration</h2><div class="st">${[1,2,3].map(i=>h`<i class=${i<=s?"on":""}/>`)}</div>
+return h`<div class="auth wide"><h2>Registration</h2><p class="sub">Step ${s} of 3${s==1?": your account":s==2?": academic details":""}</p><div class="st">${[1,2,3].map(i=>h`<i class=${i<=s?"on":""}/>`)}</div>
+<div class="panel">
 ${s==1&&h`<div><h3>Create your account</h3>${I("First name","fn")}${I("Last name","ln")}${I("Email","email","email")}${I("Password (8+ characters)","pw","password")}${I("Confirm password","pw2","password")}<label>Are you an SMC student?<select value=${f.smc} onChange=${set("smc")}><option>Yes</option><option>No</option></select></label></div>`}
 ${s==2&&h`<div><h3>Academic details</h3>${I("Phone number","phone","tel")}${I("Institution name","inst")}${I("Programme (e.g. MBBS)","prog")}${I("Degree year","year")}
-<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" style="width:auto;margin-top:5px" onChange=${e=>setF({...f,agree:e.target.checked})}/><span>I agree to the <a href="#terms" onClick=${e=>{e.preventDefault();go("terms")}}>Terms of Use</a> and <a href="#conduct" onClick=${e=>{e.preventDefault();go("conduct")}}>Code of Conduct</a>.</span></label>
-<p class="mut" style="font-size:.85rem">Next, we email you a confirmation link. After confirming, log in and upload your payment proof from your dashboard. The team then verifies it and your status changes to Approved or Rejected.</p></div>`}
-${err&&h`<div class="err">${err}</div>`}
-<div style="display:flex;gap:10px">${s>1&&h`<button class="btn o" onClick=${()=>{setErr("");setS(1)}}>Back</button>`}<button class="btn" disabled=${busy} onClick=${s==1?next:submit}>${s==1?"Continue":busy?"Creating account...":"Create account"}</button></div>
-${s==1&&h`<p class="mut">Already registered? <a href="#login" onClick=${e=>{e.preventDefault();go("login")}}>Log in</a></p>`}</div>`}
+<label class="chk"><input type="checkbox" checked=${!!f.agree} onChange=${e=>setF({...f,agree:e.target.checked})}/><span>I agree to the <a href="#terms" onClick=${e=>{e.preventDefault();go("terms")}}>Terms of Use</a> and <a href="#conduct" onClick=${e=>{e.preventDefault();go("conduct")}}>Code of Conduct</a>.</span></label>
+<p class="fine">Next, we email you a confirmation link. After confirming, log in and upload your payment proof from your dashboard. The team then verifies it and your status changes to Approved or Rejected.</p></div>`}
+${err&&h`<div class="err" role="alert">${err}</div>`}
+<div class="row">${s>1&&h`<button class="btn o" onClick=${()=>{setErr("");setS(1)}}>Back</button>`}<button class="btn" disabled=${busy} onClick=${s==1?next:submit}>${s==1?"Continue":busy?"Creating account...":"Create account"}</button></div>
+${s==1&&h`<p class="alt">Already registered? <a href="#login" onClick=${e=>{e.preventDefault();go("login")}}>Log in</a></p>`}</div></div>`}

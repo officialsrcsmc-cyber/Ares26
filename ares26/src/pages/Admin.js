@@ -18,8 +18,8 @@ useEffect(()=>{if(isAdmin)load()},[isAdmin]);
 useEffect(()=>{setDraft(ct)},[ct]);
 
 if(session===undefined||(session&&profile===undefined))return h`<div class="w sec"><p class="mut">Loading...</p></div>`;
-if(!session)return h`<div class="w sec" style="max-width:380px"><h2>Admin sign in</h2><label>Email<input type="email" value=${em} onInput=${e=>setEm(e.target.value)}/></label><label>Password<input type="password" value=${pw} onInput=${e=>setPw(e.target.value)}/></label>${er&&h`<div class="err">${er}</div>`}
-<button class="btn" onClick=${async()=>{setEr("");const{error}=await sb.auth.signInWithPassword({email:em.trim(),password:pw});if(error)setEr("Email or password is incorrect.")}}>Sign in</button></div>`;
+if(!session)return h`<div class="auth"><h2>Admin sign in</h2><div class="panel"><label>Email<input type="email" value=${em} onInput=${e=>setEm(e.target.value)}/></label><label>Password<input type="password" value=${pw} onInput=${e=>setPw(e.target.value)}/></label>${er&&h`<div class="err" role="alert">${er}</div>`}
+<button class="btn block" onClick=${async()=>{setEr("");const{error}=await sb.auth.signInWithPassword({email:em.trim(),password:pw});if(error)setEr("Email or password is incorrect.")}}>Sign in</button></div></div>`;
 if(!isAdmin)return h`<div class="w sec" style="max-width:480px"><h2>Not authorized</h2><p class="mut">This account does not have admin access. Ask an existing admin to enable it.</p><button class="btn o" onClick=${logout}>Log out</button></div>`;
 
 const flash=t=>{setMsg(t);setTimeout(()=>setMsg(""),4000)};
