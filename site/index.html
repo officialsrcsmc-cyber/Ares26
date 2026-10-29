@@ -20,17 +20,26 @@
       <a href="#publications">Publications</a>
       <a href="/ares26/" class="on">ARES'26</a>
     </nav>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="mnav">
+      <span></span><span></span><span></span>
+    </button>
   </div>
+  <nav class="mnav" id="mnav">
+    <a href="#mission">Mission</a>
+    <a href="#workshop">Workshop</a>
+    <a href="#publications">Publications</a>
+    <a href="/ares26/" class="on">ARES'26</a>
+  </nav>
 </header>
 
 <section class="hero">
-  <div class="w">
+  <div class="w hero-in">
     <img src="assets/src-logo.png" alt="SRC logo" class="hero-logo"/>
     <p class="mut lead">A student-led research society fostering a culture of research, innovation and academic excellence — empowering future healthcare professionals with the skills and confidence to lead impactful research.</p>
   </div>
 </section>
 
-<section class="w sec">
+<section class="w sec reveal">
   <div class="ares-box">
     <div class="ares-box-text">
       <span class="badge">Flagship event</span>
@@ -41,12 +50,12 @@
   </div>
 </section>
 
-<section id="mission" class="sec w">
+<section id="mission" class="sec w reveal">
   <h2>Our Mission &amp; Goal</h2>
   <p class="mut" style="max-width:720px">Fostering a culture of research, innovation, and academic excellence. We equip future healthcare professionals with the skills, ethics, and confidence to lead impactful research in medicine and public health.</p>
 </section>
 
-<section id="workshop" class="sec w" style="padding-top:0">
+<section id="workshop" class="sec w reveal" style="padding-top:0">
   <h2>Workshop</h2>
   <div class="card">
     <h3>Hands-on research workshops</h3>
@@ -54,7 +63,7 @@
   </div>
 </section>
 
-<section id="publications" class="sec w" style="padding-top:0">
+<section id="publications" class="sec w reveal" style="padding-top:0">
   <h2>Publications</h2>
   <div class="card">
     <h3>Student research &amp; highlights</h3>
@@ -86,5 +95,42 @@
   </div>
 </footer>
 
+<script>
+  // Hamburger menu toggle
+  var burger = document.getElementById('burger');
+  var mnav = document.getElementById('mnav');
+  function closeMenu(){
+    burger.setAttribute('aria-expanded','false');
+    burger.classList.remove('open');
+    mnav.classList.remove('open');
+  }
+  burger.addEventListener('click', function(){
+    var open = burger.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    mnav.classList.toggle('open', open);
+  });
+  mnav.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', closeMenu);
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeMenu();
+  });
+
+  // Scroll reveal animation
+  var revealEls = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold:.15, rootMargin:'0px 0px -40px 0px'});
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  }
+</script>
 </body>
 </html>
