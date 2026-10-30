@@ -1,4 +1,4 @@
-import {useState,useEffect,h,LOGO,DEF,NAV,Faq} from './shared.js';
+import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq} from './shared.js';
 import {sb} from './supabase.js';
 
 import Home from './pages/Home.js';
@@ -24,7 +24,7 @@ const validContent=c=>c&&Array.isArray(c.dates)&&Array.isArray(c.team)&&Array.is
 function Setup(){return h`<div class="w sec" style="max-width:560px"><h2>Setup needed</h2><p class="mut">The site cannot find its Supabase settings. Copy <b>.env.example</b> to <b>.env</b>, fill in your project URL and anon key, then restart <b>npm run dev</b>. On a hosting service, add the same two variables in its environment settings and redeploy.</p></div>`}
 
 export default function App(){
-const[pg,setPg]=useState(()=>{const t=(location.hash||"").slice(1);return PAGES[t]?t:"home"}),[menu,setMenu]=useState(false),
+const[pg,setPg]=useState(()=>{const h=location.hash||"";if(/type=signup/.test(h))return"login";const t=h.slice(1);return PAGES[t]?t:"home"}),[menu,setMenu]=useState(false),
 [session,setSession]=useState(undefined),[profile,setProfile]=useState(undefined),[abs,setA]=useState([]),[ct,setC]=useState(DEF);
 
 // auth session
@@ -47,7 +47,7 @@ useEffect(()=>{refresh()},[session&&session.user.id]);
 const go=p=>{setPg(p);setMenu(false);window.scrollTo(0,0);try{location.hash=p}catch(e){}};
 const logout=async()=>{await sb.auth.signOut();setProfile(null);setA([]);go("home")};
 const P={go,sb,session,profile,refresh,logout,abs,ct,setC},Page=PAGES[pg]||Home;
-return h`<div><header><div class="w hd"><img src=${LOGO} alt="ARES’26" onClick=${()=>go("home")}/><div class="sp"/><nav>${NAV.map(([k,l])=>h`<a key=${k} class=${pg==k?"on":""} onClick=${()=>go(k)}>${l}</a>`)}${profile&&profile.is_admin&&h`<a class=${pg=="ares-admin"?"on":""} onClick=${()=>go("ares-admin")}>Admin</a>`}</nav>
+return h`<div><header><div class="w hd"><img src=${LOGO_LIGHT} alt="ARES’26" onClick=${()=>go("home")}/><div class="sp"/><nav>${NAV.map(([k,l])=>h`<a key=${k} class=${pg==k?"on":""} onClick=${()=>go(k)}>${l}</a>`)}${profile&&profile.is_admin&&h`<a class=${pg=="ares-admin"?"on":""} onClick=${()=>go("ares-admin")}>Admin</a>`}</nav>
 <button class="btn s" onClick=${()=>go("register")}>Register now</button><button class="btn o s bg" aria-label="Menu" onClick=${()=>setMenu(!menu)}>${menu?"Close":"Menu"}</button></div>
 ${menu&&h`<div class="mn">${NAV.map(([k,l])=>h`<a key=${k} onClick=${()=>go(k)}>${l}</a>`)}${profile&&profile.is_admin&&h`<a onClick=${()=>go("ares-admin")}>Admin</a>`}</div>`}</header>
 ${sb?h`<${Page} ...${P}/>`:h`<${Setup}/>`}
