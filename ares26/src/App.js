@@ -35,7 +35,7 @@ useEffect(()=>{if(!sb)return;
 
 // public site content (dates, team, FAQs) edited by admins
 useEffect(()=>{if(!sb)return;
- sb.from("site_content").select("data").eq("id",1).maybeSingle().then(({data})=>{if(data&&validContent(data.data))setC(data.data)})},[]);
+ sb.from("site_content").select("data").eq("id",1).maybeSingle().then(({data})=>{if(data&&validContent(data.data))setC({...data.data,dates:DEF.dates})})},[]);
 
 // the signed-in person's profile and abstracts
 const refresh=async()=>{
@@ -53,7 +53,7 @@ ${menu&&h`<div class="mn">${NAV.map(([k,l])=>h`<a key=${k} onClick=${()=>go(k)}>
 ${sb?h`<${Page} ...${P}/>`:h`<${Setup}/>`}
 <footer><div class="w ft">
 <div class="ft-col"><h3>Contact</h3><p class="mut">Email: official.srcsmc@gmail.com</p><p class="mut">Phone: (048) 9232004</p><p class="mut">Address: 2P3F+H7J, Faisalabad Rd, Sargodha</p></div>
-<div class="ft-col"><h3>ARES'26</h3><p class="mut">Academic Research &amp; Excellence Symposium, organised by the Student Research Council (SRC) at Sargodha Medical College.</p></div>
+<div class="ft-col"><h3>ARES'26</h3><p class="mut">Academic Research & Excellence Symposium, organised by the Student Research Council (SRC) at Sargodha Medical College.</p></div>
 <div class="ft-col"><h3>Quick Links</h3><p><a onClick=${()=>go("home")}>Home</a></p><p><a onClick=${()=>go("register")}>Register</a></p><p><a onClick=${()=>go("abstracts")}>Submit abstract</a></p><p><a onClick=${()=>go("terms")}>Terms of use</a></p><p><a onClick=${()=>go("conduct")}>Code of conduct</a></p><p><a href="/">← Back to SRC</a></p></div>
 </div>
 <div class="w ft-bottom mut">© 2026 SRC – Sargodha Medical College. All rights reserved.</div>

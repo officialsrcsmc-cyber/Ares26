@@ -7,13 +7,11 @@ const CATS=[["Original Research Studies","Cross-sectional studies; cohort studie
 ["Database & Population-Based Studies","CDC WONDER database studies; Global Burden of Disease (GBD) studies; other large-scale national or international database and registry-based studies."]];
 const CONTENT=[["Title","Concise and reflective of the research"],["Introduction","Background, rationale and objectives"],["Methodology","Study design, sample, tools and data analysis"],["Results","Key findings, including a numeric/statistical summary"],["Conclusion & recommendations",""],["Keywords","3–5 terms, preferably using MeSH terms"]];
 const PRES=[["Modes of presentation","Oral and Poster"],["Top 3 presentations","Cash prizes"],["Certificates","Awarded to all participants & presenters"],["CME points","For Pre-Conference Workshop participants and scientific-session presenters (oral or poster)"]];
-const STEPS=["Submit your abstract through the Google Form using the QR code.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026 (tentative).","Final PowerPoint presentation / poster due: by 19 Nov 2026 (tentative).","After acceptance, pay PKR 1,000 per participant/presenter.","Upload the fee payment receipt in the registration form on the website."];
+const STEPS=["Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","Final PowerPoint presentation / poster due: by 19 Nov 2026.","After acceptance, pay PKR 1,000 per participant/presenter.","Upload the fee payment receipt in the registration form on the website."];
 const POLICY=[["Multiple authorships permitted","You may be listed as an author or co-author on more than one submitted abstract."],["One presentation per person","You may serve as the presenting author for only ONE accepted abstract, whether oral or poster."],["More than one acceptance","If you're the presenting author on more than one accepted abstract, nominate another listed co-author to present the rest — they must complete the required registration."],["Designated presenter","Every abstract names one presenting author, responsible for delivering it and answering questions."]];
 
 const Guidelines=({ct})=>{
 const dl=(ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[])[0]||"9 Nov";
-const KEY=[["Registration opens","2026-10-31"],["Abstract submission opens","2026-10-31"],["Registration & abstract deadline","2026-11-09"],["ARES’26 main event","2026-11-21"]];
-const dd=iso=>new Date(iso+"T00:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
 return h`<div class="panel" style="margin-bottom:32px">
 <h2 style="margin-bottom:4px">Abstract Submission Guidelines</h2>
 <p class="mut" style="margin:0 0 24px">Sargodha Medical College, Sargodha – Pakistan · ARES’26 · Saturday, 21st November 2026</p>
@@ -22,11 +20,6 @@ return h`<div class="panel" style="margin-bottom:32px">
 <div class="card k"><div class="dt"><b>Conference date</b></div><p style="margin:8px 0 0">Sat, 21 Nov 2026</p></div>
 <div class="card k"><div class="dt"><b>Mode</b></div><p style="margin:8px 0 0">In-person</p></div>
 <div class="card k"><div class="dt"><b>Abstract deadline</b></div><p style="margin:8px 0 0">${dl} 2026</p></div>
-</div>
-
-<h3>Key dates</h3>
-<div class="g c2" style="margin-bottom:28px">
-${KEY.map(([t,d])=>h`<div class="card" key=${t} style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span>${t}</span><b style="color:var(--p);white-space:nowrap">${dd(d)}</b></div>`)}
 </div>
 
 <h3>Abstract formatting</h3>
@@ -45,15 +38,15 @@ ${CATS.map(([t,d])=>h`<details key=${t}><summary>${t}</summary><p>${d}</p></deta
 ${CONTENT.map(([t,d])=>h`<li key=${t}><b>${t}</b>${d?" — "+d:""}</li>`)}
 </ol>
 
-<h3>Presentation &amp; recognition</h3>
+<h3>Presentation & recognition</h3>
 <div class="g c2" style="margin-bottom:28px">
 ${PRES.map(([t,d])=>h`<div class="card" key=${t}><b>${t}</b><p class="mut" style="margin:6px 0 0">${d}</p></div>`)}
 </div>
 
-<h3>Submission &amp; review</h3>
+<h3>Submission & review</h3>
 <ol style="margin:0 0 28px;padding-left:20px;line-height:1.9">${STEPS.map((s,i)=>h`<li key=${i}>${s}</li>`)}</ol>
 
-<h3>Authorship &amp; presenting author policy</h3>
+<h3>Authorship & presenting author policy</h3>
 <ul style="margin:0;padding-left:20px;line-height:1.9">
 ${POLICY.map(([t,d])=>h`<li key=${t}><b>${t}</b> — ${d}</li>`)}
 </ul>
