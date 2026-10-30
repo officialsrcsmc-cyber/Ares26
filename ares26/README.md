@@ -22,7 +22,7 @@ Open **Authentication** in Supabase:
 1. Register on the site with your own email and click the confirmation link.
 2. In the SQL Editor run (with your email):
    `update public.profiles set is_admin = true where email = 'you@example.com';`
-3. Open `/ares26/#ares-admin` and sign in. Admins can review payments, change status, read abstracts, edit dates/team/FAQs, and download CSVs.
+3. Open `/#ares-admin` and sign in. Admins can review payments, change status, read abstracts, edit dates/team/FAQs, and download CSVs.
 
 ## 5. Put it online
 Netlify, Vercel or Cloudflare Pages all work: build command `npm run build`, output folder `dist`, and add the two `VITE_` variables in the host's environment settings. Then make sure that final address is in Supabase **Site URL** and **Redirect URLs**.
@@ -42,9 +42,3 @@ Uses Resend (resend.com). Install the Supabase CLI, then:
 - Edit the bank details text (`BANK`) in `src/shared.js`.
 - Passwords are handled by Supabase Auth; the site never stores them.
 - Free-tier projects pause after a week of no activity. Open the dashboard occasionally, or upgrade before the event.
-
-## Production notes (added)
-- In Supabase **Authentication → URL Configuration → Redirect URLs** add `https://srcsmc.org/ares26/` (confirmation and password-reset emails now return there, not the site root).
-- Optional: run `supabase/hardening.sql` once for server-side length/ownership checks.
-- Vercel: `vercel.json` sets build command, security headers (CSP, HSTS), www→apex redirect, clean URLs.
-- Analytics: enable **Web Analytics** in the Vercel project; the site only loads it after the visitor consents.
