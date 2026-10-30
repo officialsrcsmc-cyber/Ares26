@@ -10,14 +10,15 @@ import Dashboard from './pages/Dashboard.js';
 import Admin from './pages/Admin.js';
 
 const Txt=(t,b)=>()=>h`<div class="w sec" style="max-width:640px"><h2>${t}</h2><p class="mut">${b}</p></div>`;
+
+const AdminGate=P=>{if(P.session===undefined||(P.session&&P.profile===undefined))return h`<div class="w sec"><p class="mut">Loading...</p></div>`;
+ return P.profile&&P.profile.is_admin?h`<${Admin} ...${P}/>`:h`<div class="w sec" style="max-width:560px;text-align:center"><h2>This page doesn’t exist</h2><p class="mut">The link may be broken or the page may have moved.</p><button class="btn" onClick=${()=>P.go("home")}>Go home</button></div>`};
+
 const PAGES={home:Home,register:Registration,login:Login,reset:Reset,abstracts:Abstracts,dashboard:Dashboard,"ares-admin":AdminGate,
 faqs:P=>h`<div class="w sec"><h2>FAQs</h2><${Faq} ct=${P.ct}/></div>`,
 workshops:Txt("Workshops","Coming soon. Hands-on workshop details, schedule and enrolment will be posted here."),
 terms:Txt("Terms of use","Placeholder. The organizing committee will publish the full Terms of Use before registration opens."),
 conduct:Txt("Code of conduct","Placeholder. ARES’26 expects respectful, honest and inclusive conduct from every participant. Full text to follow.")};
-
-const AdminGate=P=>{if(P.session===undefined||(P.session&&P.profile===undefined))return h`<div class="w sec"><p class="mut">Loading...</p></div>`;
- return P.profile&&P.profile.is_admin?h`<${Admin} ...${P}/>`:h`<div class="w sec" style="max-width:560px;text-align:center"><h2>This page doesn’t exist</h2><p class="mut">The link may be broken or the page may have moved.</p><button class="btn" onClick=${()=>P.go("home")}>Go home</button></div>`};
 const validContent=c=>c&&Array.isArray(c.dates)&&Array.isArray(c.team)&&Array.isArray(c.faqs);
 
 function Setup(){return h`<div class="w sec" style="max-width:560px"><h2>Setup needed</h2><p class="mut">The site cannot find its Supabase settings. Copy <b>.env.example</b> to <b>.env</b>, fill in your project URL and anon key, then restart <b>npm run dev</b>. On a hosting service, add the same two variables in its environment settings and redeploy.</p></div>`}
