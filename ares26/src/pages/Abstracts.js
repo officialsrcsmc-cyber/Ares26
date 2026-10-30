@@ -10,46 +10,82 @@ const PRES=[["Modes of presentation","Oral and Poster"],["Top 3 presentations","
 const STEPS=["Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","Final PowerPoint presentation / poster due: by 19 Nov 2026.","After acceptance, pay PKR 1,000 per participant/presenter.","Upload the fee payment receipt in the registration form on the website."];
 const POLICY=[["Multiple authorships permitted","You may be listed as an author or co-author on more than one submitted abstract."],["One presentation per person","You may serve as the presenting author for only ONE accepted abstract, whether oral or poster."],["More than one acceptance","If you're the presenting author on more than one accepted abstract, nominate another listed co-author to present the rest — they must complete the required registration."],["Designated presenter","Every abstract names one presenting author, responsible for delivering it and answering questions."]];
 
+
+/* ---------- Presentation helpers (icons, accordion, highlighting) ---------- */
+const IC={
+cal:"M8 2v4|M16 2v4|M3 10h18|M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
+pin:"M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z|M12 7a3 3 0 1 0 0 6a3 3 0 0 0 0-6z",
+clock:"M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18z|M12 7v5l3 2",
+words:"M4 7V5h16v2|M9 19h6|M12 5v14",
+font:"M4 20l8-16 8 16|M7.5 14h9",
+space:"M9 6h11|M9 12h11|M9 18h11|M4 4v16|M2.5 5.5L4 4l1.5 1.5|M2.5 18.5L4 20l1.5-1.5",
+globe:"M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18z|M3 12h18|M12 3c2.5 2.5 3.8 5.6 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.6-3.8-9S9.5 5.5 12 3z",
+file:"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z|M14 3v5h5|M9 13h6|M9 17h6",
+present:"M3 4h18|M5 4v11h14V4|M12 15v5|M8 20h8",
+trophy:"M8 21h8|M12 17v4|M7 4h10v5a5 5 0 0 1-10 0z|M7 6H4v1a3 3 0 0 0 3 3|M17 6h3v1a3 3 0 0 1-3 3",
+award:"M12 3a6 6 0 1 0 0 12a6 6 0 0 0 0-12z|M8.5 14L7 21l5-3 5 3-1.5-7",
+grad:"M2 9l10-5 10 5-10 5z|M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5|M22 9v6",
+chev:"M6 9l6 6 6-6",
+alert:"M10.3 3.9L2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z|M12 9.5v4|M12 17.2v.01",
+check:"M5 12.5l4.5 4.5L19 7.5",
+down:"M12 5v14|M6 13l6 6 6-6"};
+const Ic=({n,size=22})=>h`<svg viewBox="0 0 24 24" width=${size} height=${size} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">${IC[n].split("|").map((d,i)=>h`<path key=${i} d=${d}/>`)}</svg>`;
+
+const FMT_IC=["words","font","space","globe","file"];
+const PRES_IC=["present","trophy","award","grad"];
+
+// wraps every match of `re` (one capture group) in a highlighted element
+const mark=(s,re,tag)=>String(s).split(re).map((x,i)=>i%2?h`<${tag||"mark"} class=${tag?"ab-key":"ab-hl"} key=${i}>${x}<//>`:x);
+
+const Acc=({t,d,i})=>{const[o,setO]=useState(false),id="ab-acc-"+i;
+return h`<div class=${"ab-acc"+(o?" open":"")}>
+<h3 class="ab-acc-h"><button type="button" class="ab-acc-b" id=${id+"-b"} aria-expanded=${o} aria-controls=${id} onClick=${()=>setO(!o)}><span>${t}</span><span class="ab-chev"><${Ic} n="chev" size=${18}/></span></button></h3>
+<div class="ab-acc-p" id=${id} role="region" aria-labelledby=${id+"-b"}><div><p>${d}</p></div></div></div>`};
+
+const Sec=({t,id,children})=>h`<section class="ab-sec" aria-labelledby=${id}><h2 class="ab-h" id=${id}>${t}</h2>${children}</section>`;
+
 const Guidelines=({ct})=>{
-const dl=(ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[])[0]||"9 Nov";
-return h`<div class="panel" style="margin-bottom:32px">
-<h2 style="margin-bottom:4px">Abstract Submission Guidelines</h2>
-<p class="mut" style="margin:0 0 24px">Sargodha Medical College, Sargodha – Pakistan · ARES’26 · Saturday, 21st November 2026</p>
-
-<div class="g c3" style="margin-bottom:28px">
-<div class="card k"><div class="dt"><b>Conference date</b></div><p style="margin:8px 0 0">Sat, 21 Nov 2026</p></div>
-<div class="card k"><div class="dt"><b>Mode</b></div><p style="margin:8px 0 0">In-person</p></div>
-<div class="card k"><div class="dt"><b>Abstract deadline</b></div><p style="margin:8px 0 0">${dl} 2026</p></div>
+const de=ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[],dl=de[0]||"9 Nov",cd=de[2]?left(de[2]):"";
+const scrollToForm=()=>{const el=document.getElementById("abs-form");if(el)el.scrollIntoView({behavior:"smooth",block:"start"})};
+return h`<div class="ab-page">
+<div class="ab-top">
+<p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>ABSTRACT SUBMISSIONS</span></p>
+<h1 class="ab-title">Abstract Submission Guidelines</h1>
+<p class="ab-meta"><span>Sargodha Medical College, Sargodha – Pakistan</span><span class="ab-dot" aria-hidden="true">·</span><span>ARES’26</span><span class="ab-dot" aria-hidden="true">·</span><span>Saturday, 21st November 2026</span></p>
+<button type="button" class="btn ab-cta" onClick=${scrollToForm}>Submit your abstract <${Ic} n="down" size=${18}/></button>
 </div>
 
-<h3>Abstract formatting</h3>
-<div class="g c3" style="margin-bottom:28px">
-${FMT.map(([t,d])=>h`<div class="card" key=${t}><b style="display:block;margin-bottom:6px">${t}</b><span class="mut" style="font-size:.9rem">${d}</span></div>`)}
+<div class="ab-key-cards">
+<div class="ab-kc"><span class="ab-ico"><${Ic} n="cal"/></span><div><p class="ab-lbl">Conference date</p><p class="ab-val">Sat, 21 Nov 2026</p></div></div>
+<div class="ab-kc"><span class="ab-ico"><${Ic} n="pin"/></span><div><p class="ab-lbl">Mode</p><p class="ab-val">In-person</p></div></div>
+<div class="ab-kc ab-deadline"><span class="ab-ico"><${Ic} n="clock"/></span><div><p class="ab-lbl">Abstract deadline</p><p class="ab-val">${dl} 2026</p>${cd&&h`<span class="ab-pill">${cd.charAt(0)+cd.slice(1).toLowerCase()}</span>`}</div></div>
 </div>
 
-<h3>Abstract categories</h3>
-<div style="margin-bottom:12px">
-${CATS.map(([t,d])=>h`<details key=${t}><summary>${t}</summary><p>${d}</p></details>`)}
-</div>
-<p class="err" style="margin-bottom:28px"><b>Not accepted:</b> Narrative reviews, letters to the editor, editorials, opinion articles and commentaries.</p>
+<${Sec} t="Abstract formatting" id="ab-fmt"><div class="ab-fmt">
+${FMT.map(([t,d],i)=>h`<div class=${"ab-fc"+(i==0?" wide":"")} key=${t}><span class="ab-ico sm"><${Ic} n=${FMT_IC[i]} size=${20}/></span><div><p class="ab-lbl dk">${t}</p><p class="ab-txt">${d}</p></div></div>`)}
+</div><//>
 
-<h3>Abstract content structure</h3>
-<ol style="margin:0 0 28px;padding-left:20px;line-height:1.9">
-${CONTENT.map(([t,d])=>h`<li key=${t}><b>${t}</b>${d?" — "+d:""}</li>`)}
-</ol>
+<${Sec} t="Abstract categories" id="ab-cat">
+<div class="ab-accs">${CATS.map(([t,d],i)=>h`<${Acc} key=${t} t=${t} d=${d} i=${i}/>`)}</div>
+<div class="ab-warn" role="note"><span class="ab-warn-i"><${Ic} n="alert" size=${20}/></span><p><b>Not accepted:</b> Narrative reviews, letters to the editor, editorials, opinion articles and commentaries.</p></div>
+<//>
 
-<h3>Presentation & recognition</h3>
-<div class="g c2" style="margin-bottom:28px">
-${PRES.map(([t,d])=>h`<div class="card" key=${t}><b>${t}</b><p class="mut" style="margin:6px 0 0">${d}</p></div>`)}
-</div>
+<${Sec} t="Abstract content structure" id="ab-str">
+<ol class="ab-struct">${CONTENT.map(([t,d],i)=>h`<li key=${t}><span class="ab-num" aria-hidden="true">${i+1}</span><div><b>${t}</b>${d&&h`<span>${d}</span>`}</div></li>`)}</ol>
+<//>
 
-<h3>Submission & review</h3>
-<ol style="margin:0 0 28px;padding-left:20px;line-height:1.9">${STEPS.map((s,i)=>h`<li key=${i}>${s}</li>`)}</ol>
+<${Sec} t="Presentation & recognition" id="ab-pres"><div class="ab-pres">
+${PRES.map(([t,d],i)=>h`<div class="ab-pc" key=${t}><span class="ab-ico"><${Ic} n=${PRES_IC[i]}/></span><div><p class="ab-pt">${t}</p><p class="ab-txt">${d}</p></div></div>`)}
+</div><//>
 
-<h3>Authorship & presenting author policy</h3>
-<ul style="margin:0;padding-left:20px;line-height:1.9">
-${POLICY.map(([t,d])=>h`<li key=${t}><b>${t}</b> — ${d}</li>`)}
-</ul>
+<${Sec} t="Submission & review" id="ab-sub">
+<ol class="ab-tl">${STEPS.map((s,i)=>{const pay=/PKR|receipt/i.test(s),date=/\d{1,2} Nov 2026/.test(s);
+return h`<li key=${i}><span class="ab-num" aria-hidden="true">${i+1}</span><div class="ab-step"><p>${mark(s,/(\d{1,2} Nov 2026|PKR [\d,]+)/)}</p>${(pay||date)&&h`<span class=${"ab-tag"+(pay?" pay":"")}>${pay?"Payment":"Key date"}</span>`}</div></li>`})}</ol>
+<//>
+
+<${Sec} t="Authorship & presenting author policy" id="ab-pol">
+<ul class="ab-pol">${POLICY.map(([t,d])=>h`<li key=${t}><span class="ab-ck"><${Ic} n="check" size=${16}/></span><p><b>${t}</b> — ${mark(d,/\b(ONE)\b/,"strong")}</p></li>`)}</ul>
+<//>
 </div>`};
 
 export default function Abstracts(P){
@@ -79,8 +115,8 @@ ${SECT.map(s=>h`<label key=${s}>${s}<textarea rows="4" value=${f[s]||""} onInput
 ${err&&h`<div class="err" role="alert">${err}</div>`}<button class="btn block" disabled=${busy} onClick=${sub}>${busy?"Submitting...":"Submit abstract"}</button></div></div>`}
 
 return h`<div>
-<section class="sec w" style="max-width:860px;padding-bottom:0">
+<section class="sec w ab">
 <${Guidelines} ct=${ct}/>
 </section>
-${body}
+<div id="abs-form" class="ab-form">${body}</div>
 </div>`}
