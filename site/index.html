@@ -3,18 +3,46 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>SRC · Sargodha Medical College Research Society</title>
+<title>SRC · Sargodha Medical College Student Research Council</title>
 <meta name="description" content="SRC – a student-led research society based in Sargodha Medical College, fostering research, innovation and academic excellence."/>
+<meta name="robots" content="index, follow, max-image-preview:large"/>
+<link rel="canonical" href="https://srcsmc.org/"/>
 <meta name="theme-color" content="#4B1F6F"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="SRC – Sargodha Medical College"/>
+<meta property="og:title" content="SRC · Sargodha Medical College Student Research Council"/>
+<meta property="og:description" content="A student-led society building tomorrow's healthcare researchers. Home of ARES'26, November 21, 2026."/>
+<meta property="og:url" content="https://srcsmc.org/"/>
+<meta property="og:image" content="https://srcsmc.org/og-image.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="SRC logo with the text Where student research begins, Sargodha Medical College, ARES'26"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="SRC · Sargodha Medical College Student Research Council"/>
+<meta name="twitter:description" content="A student-led society building tomorrow's healthcare researchers. Home of ARES'26, November 21, 2026."/>
+<meta name="twitter:image" content="https://srcsmc.org/og-image.jpg"/>
+<meta name="twitter:image:alt" content="SRC logo with the text Where student research begins, Sargodha Medical College, ARES'26"/>
+<link rel="icon" href="/favicon.ico" sizes="48x48"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32"/>
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16"/>
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<link rel="manifest" href="/site.webmanifest"/>
+<link rel="preload" as="image" href="/assets/src-logo-96.webp" type="image/webp" fetchpriority="high"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"SRC – Sargodha Medical College","url":"https://srcsmc.org/","logo":"https://srcsmc.org/icon-512.png","email":"official.srcsmc@gmail.com","telephone":"+92489232004","sameAs":["https://www.instagram.com/src.smc","https://www.linkedin.com/company/src-smc/"]}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
-<script>document.documentElement.classList.add('js')</script>
-<link rel="stylesheet" href="style.css"/>
+<script src="/js-flag.js"></script>
+<link rel="stylesheet" href="/style.css"/>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
 <header id="top">
   <div class="w hd">
-    <img src="assets/src-logo.png" alt="SRC – Sargodha Medical College" class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})"/>
+    <a href="/" class="logo-link" aria-label="SRC – Sargodha Medical College, home"><picture><source type="image/webp" srcset="/assets/src-logo-96.webp 1x, /assets/src-logo-192.webp 2x"/><img src="/assets/src-logo-96.png" srcset="/assets/src-logo-96.png 1x, /assets/src-logo-192.png 2x" alt="" width="48" height="48" class="logo" decoding="async"/></picture></a>
     <div class="sp"></div>
     <nav>
       <a href="#mission">Mission</a>
@@ -36,14 +64,15 @@
   </nav>
 </header>
 
+<main id="main">
 <!-- 1. HERO -->
 <section class="hero">
   <div class="w hero-in">
     <h1>Where student research begins</h1>
     <p class="lead">A student-led society building tomorrow's healthcare researchers.</p>
     <div class="cta">
-      <a class="btn" href="#what-we-do">Explore our work</a>
-      <a class="btn btn-ghost" href="https://chat.whatsapp.com/B6En3NpqzD1LiGz3iYykQF?s=cl&p=a&mlu=4&ilr=4&iam=2" target="_blank" rel="noopener">Join SRC</a>
+      <a class="btn" href="#what-we-do" data-track="cta_explore_work">Explore our work</a>
+      <a class="btn btn-ghost" data-track="cta_join_src" href="https://chat.whatsapp.com/B6En3NpqzD1LiGz3iYykQF?s=cl&p=a&mlu=4&ilr=4&iam=2" target="_blank" rel="noopener noreferrer">Join SRC</a>
     </div>
   </div>
 </section>
@@ -51,7 +80,7 @@
 <!-- 3. ARES'26 CARD -->
 <section class="ares-wrap reveal">
   <div class="w">
-    <div class="ares-box">
+    <div class="ares-box" id="ares-card">
       <div class="ares-main">
         <div class="ares-top">
           <span class="badge">Flagship event</span>
@@ -60,12 +89,12 @@
         <h2>ARES'26</h2>
         <p>Academic Research &amp; Excellence Symposium — Sargodha Medical College's first international research conference. Register, submit an abstract, and meet researchers shaping medicine.</p>
         <div class="chips">
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Nov 21, 2026</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>Sargodha Medical College</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>International</span>
+          <span class="chip"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Nov 21, 2026</span>
+          <span class="chip"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>Sargodha Medical College</span>
+          <span class="chip"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>International</span>
         </div>
       </div>
-      <a class="btn btn-gold" href="/ares26/">Visit ARES'26 →</a>
+      <a class="btn btn-gold" href="/ares26/" data-track="cta_visit_ares">Visit ARES'26 →</a>
     </div>
   </div>
 </section>
@@ -92,17 +121,17 @@
     <div class="sec-head"><h2>What we do</h2><p class="mut">Three ways SRC helps students grow as researchers.</p></div>
     <div class="cards">
       <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5L4.5 19a2 2 0 001.7 3h11.6a2 2 0 001.7-3L14 9.5V2M8.5 2h7M7 16h10"/></svg></div>
+        <div class="ico"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5L4.5 19a2 2 0 001.7 3h11.6a2 2 0 001.7-3L14 9.5V2M8.5 2h7M7 16h10"/></svg></div>
         <h3>Workshops</h3>
         <p class="mut">Hands-on sessions led by invited faculty on research methodology, scientific writing and data analysis.</p>
       </div>
       <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <div class="ico"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
         <h3>Mentorship</h3>
         <p class="mut">Pairing students with experienced researchers to shape ideas into projects, abstracts and papers.</p>
       </div>
       <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <div class="ico"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
         <h3>Research projects</h3>
         <p class="mut">Guided support from idea to data collection — turning pilot studies and student-led projects into results.</p>
       </div>
@@ -121,7 +150,7 @@
       <li class="event" data-date="2026-11-20"><div class="edate"><b>20</b><span>Nov</span></div><div><h3>Workshops</h3><p>Date to be confirmed</p></div></li>
       <li class="event main" data-date="2026-11-21"><div class="edate"><b>21</b><span>Nov</span></div><div><h3>ARES'26 main event</h3><p>Sargodha Medical College</p></div></li>
     </ul>
-    <div class="events-cta"><a class="btn" href="/ares26/">Register for ARES'26</a></div>
+    <div class="events-cta"><a class="btn" href="/ares26/#register" data-track="cta_register_events" id="events-cta">Register for ARES'26</a></div>
   </div>
 </section>
 
@@ -141,8 +170,8 @@
     <div class="car-head">
       <div class="sec-head"><h2>Our team</h2><p class="mut">The students behind SRC.</p></div>
       <div class="car-btns">
-        <button class="car-btn" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="car-btn" id="next" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button class="car-btn" id="prev" aria-label="Previous"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="car-btn" id="next" aria-label="Next"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
     </div>
     <div class="car" id="car" tabindex="0" role="region" aria-label="Team members">
@@ -156,6 +185,7 @@
   </div>
 </section>
 
+</main>
 <!-- 6e. FOOTER -->
 <footer>
   <div class="w ft">
@@ -166,11 +196,10 @@
       <p>2P3F+H7J, Faisalabad Rd, Sargodha</p>
       <!-- TODO: replace each href="#" with the real social profile URL -->
       <div class="social">
-        <a href="https://www.instagram.com/src.smc" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></a>
-        <!-- TODO: replace href="#" with the real Facebook profile URL -->
-        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
-        <a href="https://www.linkedin.com/company/src-smc/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg></a>
-        <a href="mailto:official.srcsmc@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></a>
+        <a href="https://www.instagram.com/src.smc" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></a>
+        <!-- OWNER TODO: Facebook icon removed because the project contained no real Facebook URL (href was "#"). Re-add: <a href="https://facebook.com/YOUR_PAGE" aria-label="Facebook">…</a> -->
+        <a href="https://www.linkedin.com/company/src-smc/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg></a>
+        <a href="mailto:official.srcsmc@gmail.com" aria-label="Email"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></a>
       </div>
     </div>
     <div>
@@ -183,63 +212,16 @@
       <p><a href="#mission">Mission</a></p>
       <p><a href="#team">Team</a></p>
       <p><a href="/ares26/">ARES'26</a></p>
+      <p><a href="/privacy">Privacy Policy</a></p>
+      <p><a href="/terms">Terms &amp; Conditions</a></p>
+      <p><button type="button" class="linkbtn" data-cookie-settings>Cookie settings</button></p>
     </div>
   </div>
   <div class="w ft-bottom">© 2026 SRC – Sargodha Medical College. All rights reserved.</div>
 </footer>
 
-<script>
-  var burger=document.getElementById('burger'),mnav=document.getElementById('mnav');
-  function closeMenu(){burger.setAttribute('aria-expanded','false');burger.classList.remove('open');mnav.classList.remove('open')}
-  burger.addEventListener('click',function(){
-    var open=burger.classList.toggle('open');
-    burger.setAttribute('aria-expanded',open?'true':'false');
-    mnav.classList.toggle('open',open);
-  });
-  mnav.querySelectorAll('a').forEach(function(a){a.addEventListener('click',closeMenu)});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenu()});
-
-  // Header shadow once scrolled
-  var hdr=document.querySelector('header');
-  function onScroll(){hdr.classList.toggle('scrolled',window.scrollY>8)}
-  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
-
-  // Day difference using local midnight so it flips at the right time
-  function daysUntil(iso){
-    var p=iso.split('-'),t=new Date(+p[0],+p[1]-1,+p[2]),n=new Date();
-    n=new Date(n.getFullYear(),n.getMonth(),n.getDate());
-    return Math.round((t-n)/864e5);
-  }
-
-  // ARES'26 countdown
-  var cd=document.getElementById('countdown'),d=daysUntil('2026-11-21');
-  if(d>1){cd.textContent='Starts in '+d+' days';cd.hidden=false}
-  else if(d===1){cd.textContent='Starts tomorrow';cd.hidden=false}
-  else if(d===0){cd.textContent='Happening today';cd.hidden=false}
-
-  // Dim events that have already passed
-  document.querySelectorAll('.event').forEach(function(li){
-    if(daysUntil(li.getAttribute('data-date'))<0)li.classList.add('past');
-  });
-
-  // Team carousel arrows
-  var car=document.getElementById('car');
-  function step(dir){var c=car.querySelector('.member');car.scrollBy({left:dir*(c.offsetWidth+16),behavior:'smooth'})}
-  document.getElementById('prev').addEventListener('click',function(){step(-1)});
-  document.getElementById('next').addEventListener('click',function(){step(1)});
-  car.addEventListener('keydown',function(e){
-    if(e.key==='ArrowRight'){e.preventDefault();step(1)}
-    if(e.key==='ArrowLeft'){e.preventDefault();step(-1)}
-  });
-
-  // Fade-in on scroll
-  var els=document.querySelectorAll('.reveal');
-  if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(es){
-      es.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}});
-    },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
-    els.forEach(function(el){io.observe(el)});
-  }else{els.forEach(function(el){el.classList.add('in')})}
-</script>
+<a class="sticky-cta" id="sticky-cta" href="/ares26/#register" data-track="cta_sticky_register" hidden>Register for ARES'26</a>
+<script src="/main.js" defer></script>
+<script src="/consent.js" defer></script>
 </body>
 </html>

@@ -3,7 +3,7 @@ import {createClient} from '@supabase/supabase-js';
 const url=import.meta.env.VITE_SUPABASE_URL,key=import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // null when the .env file is missing, so the app can show a setup message instead of a blank page
-export const sb=url&&key?createClient(url,key,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}}):null;
+export const sb=url&&key?createClient(url,key,{auth:{flowType:'implicit',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}}):null;
 
 export const MAX_FILE=5*1024*1024;
 const ext=n=>((n.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,''))||'bin';

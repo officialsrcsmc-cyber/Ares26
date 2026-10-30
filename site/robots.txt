@@ -1,0 +1,5 @@
+# https://srcsmc.org/robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://srcsmc.org/sitemap.xml
