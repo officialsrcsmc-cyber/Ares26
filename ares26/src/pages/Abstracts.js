@@ -1,4 +1,4 @@
-import {useState,useEffect,h,BANK,DISC,SECT,left} from '../shared.js';
+import {useState,useEffect,h,BANK,DISC,SECT,left,Ic,Acc} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 const FMT=[["Word limit","Max 300 words (excl. title, keywords, author details)"],["Font","Arial or Calibri, size 12"],["Spacing","Single line spacing (1.0)"],["Language","English"],["File format","MS Word — .doc or .docx"]];
@@ -12,35 +12,11 @@ const POLICY=[["Multiple authorships permitted","You may be listed as an author 
 
 
 /* ---------- Presentation helpers (icons, accordion, highlighting) ---------- */
-const IC={
-cal:"M8 2v4|M16 2v4|M3 10h18|M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
-pin:"M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z|M12 7a3 3 0 1 0 0 6a3 3 0 0 0 0-6z",
-clock:"M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18z|M12 7v5l3 2",
-words:"M4 7V5h16v2|M9 19h6|M12 5v14",
-font:"M4 20l8-16 8 16|M7.5 14h9",
-space:"M9 6h11|M9 12h11|M9 18h11|M4 4v16|M2.5 5.5L4 4l1.5 1.5|M2.5 18.5L4 20l1.5-1.5",
-globe:"M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18z|M3 12h18|M12 3c2.5 2.5 3.8 5.6 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.6-3.8-9S9.5 5.5 12 3z",
-file:"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z|M14 3v5h5|M9 13h6|M9 17h6",
-present:"M3 4h18|M5 4v11h14V4|M12 15v5|M8 20h8",
-trophy:"M8 21h8|M12 17v4|M7 4h10v5a5 5 0 0 1-10 0z|M7 6H4v1a3 3 0 0 0 3 3|M17 6h3v1a3 3 0 0 1-3 3",
-award:"M12 3a6 6 0 1 0 0 12a6 6 0 0 0 0-12z|M8.5 14L7 21l5-3 5 3-1.5-7",
-grad:"M2 9l10-5 10 5-10 5z|M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5|M22 9v6",
-chev:"M6 9l6 6 6-6",
-alert:"M10.3 3.9L2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z|M12 9.5v4|M12 17.2v.01",
-check:"M5 12.5l4.5 4.5L19 7.5",
-down:"M12 5v14|M6 13l6 6 6-6"};
-const Ic=({n,size=22})=>h`<svg viewBox="0 0 24 24" width=${size} height=${size} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">${IC[n].split("|").map((d,i)=>h`<path key=${i} d=${d}/>`)}</svg>`;
-
 const FMT_IC=["words","font","space","globe","file"];
 const PRES_IC=["present","trophy","award","grad"];
 
 // wraps every match of `re` (one capture group) in a highlighted element
 const mark=(s,re,tag)=>String(s).split(re).map((x,i)=>i%2?h`<${tag||"mark"} class=${tag?"ab-key":"ab-hl"} key=${i}>${x}<//>`:x);
-
-const Acc=({t,d,i})=>{const[o,setO]=useState(false),id="ab-acc-"+i;
-return h`<div class=${"ab-acc"+(o?" open":"")}>
-<h3 class="ab-acc-h"><button type="button" class="ab-acc-b" id=${id+"-b"} aria-expanded=${o} aria-controls=${id} onClick=${()=>setO(!o)}><span>${t}</span><span class="ab-chev"><${Ic} n="chev" size=${18}/></span></button></h3>
-<div class="ab-acc-p" id=${id} role="region" aria-labelledby=${id+"-b"}><div><p>${d}</p></div></div></div>`};
 
 const Sec=({t,id,children})=>h`<section class="ab-sec" aria-labelledby=${id}><h2 class="ab-h" id=${id}>${t}</h2>${children}</section>`;
 

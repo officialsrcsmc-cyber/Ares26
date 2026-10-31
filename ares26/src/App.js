@@ -1,4 +1,4 @@
-import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq} from './shared.js';
+import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq,Ic} from './shared.js';
 import {sb} from './supabase.js';
 
 import Home from './pages/Home.js';
@@ -9,13 +9,14 @@ import Abstracts from './pages/Abstracts.js';
 import Dashboard from './pages/Dashboard.js';
 import Admin from './pages/Admin.js';
 
-const Txt=(t,b)=>()=>h`<div class="w sec" style="max-width:640px"><h2>${t}</h2><p class="mut">${b}</p></div>`;
+const Head=(e,t)=>h`<div class="ab-top"><p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>${e}</span></p><h1 class="ab-title">${t}</h1></div>`;
+const Txt=(t,b)=>()=>h`<div class="w sec ab txt">${Head("INFORMATION",t)}<div class="ab-note"><p>${b}</p></div></div>`;
 
 const AdminGate=P=>{if(P.session===undefined||(P.session&&P.profile===undefined))return h`<div class="w sec"><p class="mut">Loading...</p></div>`;
- return P.profile&&P.profile.is_admin?h`<${Admin} ...${P}/>`:h`<div class="w sec" style="max-width:560px;text-align:center"><h2>This page doesn’t exist</h2><p class="mut">The link may be broken or the page may have moved.</p><button class="btn" onClick=${()=>P.go("home")}>Go home</button></div>`};
+ return P.profile&&P.profile.is_admin?h`<${Admin} ...${P}/>`:h`<div class="w sec ab nf"><p class="nf-code" aria-hidden="true">404</p><h1 class="ab-title">This page doesn’t exist</h1><p class="mut">The link may be broken or the page may have moved.</p><button class="btn" onClick=${()=>P.go("home")}>Go home</button></div>`};
 
 const PAGES={home:Home,register:Registration,login:Login,reset:Reset,abstracts:Abstracts,dashboard:Dashboard,"ares-admin":AdminGate,
-faqs:P=>h`<div class="w sec"><h2>FAQs</h2><${Faq} ct=${P.ct}/></div>`,
+faqs:P=>h`<div class="w sec ab">${Head("FREQUENTLY ASKED","FAQs")}<${Faq} ct=${P.ct}/></div>`,
 workshops:Txt("Workshops","Coming soon. Hands-on workshop details, schedule and enrolment will be posted here."),
 terms:Txt("Terms of use","Placeholder. The organizing committee will publish the full Terms of Use before registration opens."),
 conduct:Txt("Code of conduct","Placeholder. ARES’26 expects respectful, honest and inclusive conduct from every participant. Full text to follow.")};
@@ -55,9 +56,9 @@ return h`<div><header><div class="w hd"><a href="#home" class="brand" aria-label
 ${menu&&h`<nav class="mn" id="mobile-menu" aria-label="Mobile">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>`}</header>
 ${sb?h`<${Page} ...${P}/>`:h`<${Setup}/>`}
 <footer><div class="w ft">
-<div class="ft-col"><h3>Contact</h3><p class="mut">Email: official.srcsmc@gmail.com</p><p class="mut">Phone: (048) 9232004</p><p class="mut">Address: 2P3F+H7J, Faisalabad Rd, Sargodha</p></div>
-<div class="ft-col"><h3>ARES'26</h3><p class="mut">Academic Research & Excellence Symposium, organised by the Student Research Council (SRC) at Sargodha Medical College.</p></div>
-<div class="ft-col"><h3>Quick Links</h3><p><a onClick=${()=>go("home")}>Home</a></p><p><a onClick=${()=>go("register")}>Register</a></p><p><a onClick=${()=>go("abstracts")}>Submit abstract</a></p><p><a onClick=${()=>go("terms")}>Terms of use</a></p><p><a onClick=${()=>go("conduct")}>Code of conduct</a></p><p><a href="/">← Back to SRC</a></p></div>
+<div class="ft-col ft-brand"><img src=${LOGO} alt="ARES’26" class="ft-logo"/><h3>ARES'26</h3><p>Academic Research & Excellence Symposium, organised by the Student Research Council (SRC) at Sargodha Medical College.</p></div>
+<div class="ft-col"><h3>Contact</h3><p><${Ic} n="mail" size=${16}/><span>Email: official.srcsmc@gmail.com</span></p><p><${Ic} n="phone" size=${16}/><span>Phone: (048) 9232004</span></p><p><${Ic} n="pin" size=${16}/><span>Address: 2P3F+H7J, Faisalabad Rd, Sargodha</span></p></div>
+<div class="ft-col"><h3>Quick Links</h3><p><a href="#home" onClick=${e=>{e.preventDefault();go("home")}}>Home</a></p><p><a href="#register" onClick=${e=>{e.preventDefault();go("register")}}>Register</a></p><p><a href="#abstracts" onClick=${e=>{e.preventDefault();go("abstracts")}}>Submit abstract</a></p><p><a href="#terms" onClick=${e=>{e.preventDefault();go("terms")}}>Terms of use</a></p><p><a href="#conduct" onClick=${e=>{e.preventDefault();go("conduct")}}>Code of conduct</a></p><p><a href="/">← Back to SRC</a></p></div>
 </div>
-<div class="w ft-bottom mut">© 2026 SRC – Sargodha Medical College. All rights reserved.</div>
+<div class="w ft-bottom">© 2026 SRC – Sargodha Medical College. All rights reserved.</div>
 </footer></div>`}
