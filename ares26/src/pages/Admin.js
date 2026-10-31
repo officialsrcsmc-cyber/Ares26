@@ -25,6 +25,16 @@ if(!isAdmin)return h`<div class="w sec" style="max-width:480px"><h2>Not authoriz
 const flash=t=>{setMsg(t);setTimeout(()=>setMsg(""),4000)};
 const setStatus=async(table,id,status)=>{const{error}=await sb.from(table).update({status}).eq("id",id);if(error)return flash(error.message);
  table==="profiles"?setRegs(regs.map(r=>r.id==id?{...r,status}:r)):setAbss(abss.map(r=>r.id==id?{...r,status}:r))};
+const setAdmin=async(u,on)=>{const nm=(u.first_name||"")+" "+(u.last_name||"");
+ if(!window.confirm((on?"Make ":"Remove admin access from ")+nm.trim()+(on?" an admin? They will be able to review payments, abstracts and manage people.":"?")))return;
+ const{error}=await sb.rpc("set_admin",{target:u.id,make_admin:on});if(error)return flash(error.message);
+ setRegs(regs.map(r=>r.id==u.id?{...r,is_admin:on}:r));flash(on?nm.trim()+" is now an admin.":"Admin access removed.")};
+const removePerson=async u=>{const nm=((u.first_name||"")+" "+(u.last_name||"")).trim()||u.email;
+ if(!window.confirm("Permanently remove "+nm+" ("+u.email+")?\n\nThis deletes their account, payment details and abstracts. It cannot be undone."))return;
+ const files=[[ "payment-proofs",u.proof_path],...abss.filter(a=>a.user_id==u.id).map(a=>["abstract-files",a.file_path])].filter(f=>f[1]);
+ for(const b of ["payment-proofs","abstract-files"]){const paths=files.filter(f=>f[0]==b).map(f=>f[1]);if(paths.length)await sb.storage.from(b).remove(paths)}
+ const{error}=await sb.rpc("remove_user",{target:u.id});if(error)return flash(error.message);
+ setRegs(regs.filter(r=>r.id!=u.id));setAbss(abss.filter(a=>a.user_id!=u.id));flash(nm+" has been removed.")};
 const open=async(key,bucket,path)=>{try{const u=await signed(bucket,path);setLinks(l=>({...l,[key]:u}))}catch(e){flash(e.message)}};
 const ed=(key,i,j,v)=>setDraft({...draft,[key]:draft[key].map((r,x)=>x==i?r.map((c,y)=>y==j?v:c):r)});
 const saveContent=async()=>{const{error}=await sb.from("site_content").upsert({id:1,data:draft});if(error)return flash(error.message);setC(draft);flash("Saved. The public site now shows these changes.")};
@@ -42,15 +52,19 @@ const exportAbs=()=>download("ares26-abstracts.csv",[["Submitted at","Author","E
 return h`<div class="w sec"><div style="display:flex;justify-content:space-between"><h2>Admin panel</h2><button class="btn o s" onClick=${logout}>Sign out</button></div>
 ${msg&&h`<div class="ok">${msg}</div>`}
 <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">${[["reg","Registrations"],["abs","Abstracts"],["ct","Content"],["csv","Export"]].map(([k,l])=>h`<button key=${k} class=${"btn s"+(tab==k?"":" o")} onClick=${()=>{setT(k);setSf("All")}}>${l}</button>`)}<button class="btn o s" onClick=${load}>Refresh</button></div>
-<div class="g c5" style="margin-bottom:16px">${[["Registrations",regs.length],["Pending",cnt(regs,"Pending")],["Approved",cnt(regs,"Approved")],["Abstracts",abss.length],["Awaiting review",cnt(abss,"Submitted")+cnt(abss,"Under Review")]].map(([l,n])=>h`<div class="card" key=${l} style="padding:12px"><b style="font-size:1.4rem">${n}</b><div class="mut" style="font-size:.8rem">${l}</div></div>`)}</div>
+<div class="g c5" style="margin-bottom:16px">${[["Registrations",regs.length],["Pending",cnt(regs,"Pending")],["Approved",cnt(regs,"Approved")],["Abstracts",abss.length],["Awaiting review",cnt(abss,"Submitted")+cnt(abss,"Under Review")],["Accepted",cnt(abss,"Accepted")]].map(([l,n])=>h`<div class="card" key=${l} style="padding:12px"><b style="font-size:1.4rem">${n}</b><div class="mut" style="font-size:.8rem">${l}</div></div>`)}</div>
 ${(tab=="reg"||tab=="abs")&&h`<label style="max-width:240px">Filter by status<select value=${sf} onChange=${e=>setSf(e.target.value)}>${["All"].concat(tab=="reg"?["Pending","Approved","Rejected"]:["Submitted","Under Review","Accepted","Rejected"]).map(x=>h`<option key=${x}>${x}</option>`)}</select></label>`}
 ${tab=="reg"&&h`<div><input placeholder="Search name, email or transaction ID" value=${q} onInput=${e=>setQ(e.target.value)} style="margin-bottom:12px"/>
-<div class="ov"><table><tr><th>Name</th><th>Payment</th><th>Status</th></tr>${shown.map(u=>h`<tr key=${u.id}><td>${u.first_name} ${u.last_name}<br/><span class="mut">${u.email}</span><br/><span class="mut">${u.institution} · ${u.programme}</span></td>
+<div class="ov"><table><tr><th>Name</th><th>Payment</th><th>Status</th><th>Manage</th></tr>${shown.map(u=>h`<tr key=${u.id}><td>${u.first_name} ${u.last_name}<br/><span class="mut">${u.email}</span><br/><span class="mut">${u.institution} · ${u.programme}</span></td>
 <td>${u.proof_path?h`<span>PKR ${u.amount}<br/>ID ${u.tx_id}<br/>${u.account_name}<br/><span class="mut">${day(u.tx_date)}</span><br/>${links["p"+u.id]?h`<a href=${links["p"+u.id]} target="_blank" rel="noopener">Open proof</a>`:h`<a onClick=${()=>open("p"+u.id,"payment-proofs",u.proof_path)}>View proof</a>`}</span>`:h`<span class="mut">No payment yet</span>`}</td>
-<td>${Sel(u.status,v=>setStatus("profiles",u.id,v),["Pending","Approved","Rejected"])}</td></tr>`)}</table>${!shown.length&&h`<p class="mut">No registrations found.</p>`}</div></div>`}
+<td>${Sel(u.status,v=>setStatus("profiles",u.id,v),["Pending","Approved","Rejected"])}</td>
+<td>${u.is_admin&&h`<span class="badge Accepted" style="margin-bottom:6px">Admin</span><br/>`}${u.id===session.user.id?h`<span class="mut">You</span>`:h`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn o s" onClick=${()=>setAdmin(u,!u.is_admin)}>${u.is_admin?"Remove admin":"Make admin"}</button>${!u.is_admin&&h`<button class="btn o s dng" onClick=${()=>removePerson(u)}>Remove</button>`}</div>`}</td></tr>`)}</table>${!shown.length&&h`<p class="mut">No registrations found.</p>`}</div></div>`}
 ${tab=="abs"&&h`<div>${absShown.map(a=>h`<div class="card" key=${a.id} style="margin-bottom:10px"><b>${a.title}</b><div class="mut" style="font-size:.85rem">${a.profiles?a.profiles.first_name+" "+a.profiles.last_name+" · "+a.profiles.email:""}<br/>${a.discipline} · ${a.category}</div>${SECT.map(s=>h`<p key=${s} style="margin:6px 0;font-size:.9rem"><b>${s}:</b> ${a.body[s]}</p>`)}
 ${a.file_path&&(links["a"+a.id]?h`<p><a href=${links["a"+a.id]} target="_blank" rel="noopener">Open attached file</a></p>`:h`<p><a onClick=${()=>open("a"+a.id,"abstract-files",a.file_path)}>View attached file</a></p>`)}
-${Sel(a.status,v=>setStatus("abstracts",a.id,v),["Submitted","Under Review","Accepted","Rejected"])}</div>`)}${!abss.length&&h`<p class="mut">No abstracts yet.</p>`}</div>`}
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><span class=${"badge "+a.status.replace(/ /g,"")}>${a.status}</span>
+<button class="btn s" disabled=${a.status==="Accepted"} onClick=${()=>setStatus("abstracts",a.id,"Accepted")}>Accept</button>
+<button class="btn o s dng" disabled=${a.status==="Rejected"} onClick=${()=>setStatus("abstracts",a.id,"Rejected")}>Reject</button>
+${Sel(a.status,v=>setStatus("abstracts",a.id,v),["Submitted","Under Review","Accepted","Rejected"])}</div></div>`)}${!abss.length&&h`<p class="mut">No abstracts yet.</p>`}</div>`}
 ${tab=="ct"&&h`<div><h3>Key dates</h3>${draft.dates.map((d,i)=>h`<div key=${i} class="g c3" style="margin-bottom:8px"><input value=${d[0]} onInput=${e=>ed("dates",i,0,e.target.value)}/><input value=${d[1]} onInput=${e=>ed("dates",i,1,e.target.value)}/><input type="date" value=${d[2]} onInput=${e=>ed("dates",i,2,e.target.value)}/></div>`)}
 <h3>Team</h3>${draft.team.map((d,i)=>h`<div key=${i} class="g c2" style="margin-bottom:8px"><input value=${d[0]} onInput=${e=>ed("team",i,0,e.target.value)}/><input value=${d[1]} onInput=${e=>ed("team",i,1,e.target.value)}/></div>`)}
 <h3>FAQs</h3>${draft.faqs.map((d,i)=>h`<div key=${i} class="g c2" style="margin-bottom:8px"><input value=${d[0]} onInput=${e=>ed("faqs",i,0,e.target.value)}/><input value=${d[1]} onInput=${e=>ed("faqs",i,1,e.target.value)}/></div>`)}

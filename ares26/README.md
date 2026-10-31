@@ -24,6 +24,11 @@ Open **Authentication** in Supabase:
    `update public.profiles set is_admin = true where email = 'you@example.com';`
 3. Open `/#ares-admin` and sign in. Admins can review payments, change status, read abstracts, edit dates/team/FAQs, and download CSVs.
 
+## Managing admins and people
+- In the admin panel, **Registrations** tab: **Make admin** / **Remove admin** promotes or demotes a person, and **Remove** permanently deletes a non-admin person (account, payment details, abstracts and uploaded files). You cannot demote or delete yourself, and an admin must be demoted before being removed.
+- **Abstracts** tab: **Accept** / **Reject** buttons (plus the full status dropdown). Participants see the result on their dashboard under **Abstract acceptance status**.
+- **Existing database?** Run the *ADMIN MANAGEMENT* section at the bottom of `supabase/schema.sql` once in the SQL Editor. Without it, Make admin and Remove will show an error.
+
 ## 5. Put it online
 Netlify, Vercel or Cloudflare Pages all work: build command `npm run build`, output folder `dist`, and add the two `VITE_` variables in the host's environment settings. Then make sure that final address is in Supabase **Site URL** and **Redirect URLs**.
 

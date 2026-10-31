@@ -109,3 +109,37 @@ insert into public.site_content (id, data) values (1, '{"dates": [["Nov 10", "Re
 
 -- ============ AFTER YOU REGISTER YOUR OWN ACCOUNT, MAKE IT AN ADMIN ============
 -- update public.profiles set is_admin = true where email = 'you@example.com';
+
+-- ============ ADMIN MANAGEMENT (make admin / remove people) ============
+-- If your database already exists, run just this section in the SQL Editor.
+
+-- Grant or revoke admin access. Admins cannot revoke their own access (so the site is never left without one).
+create or replace function public.set_admin(target uuid, make_admin boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'Only admins can do this.'; end if;
+  if target = auth.uid() and not make_admin then raise exception 'You cannot remove your own admin access.'; end if;
+  update public.profiles set is_admin = make_admin where id = target;
+end $$;
+
+-- Permanently delete a person: their login, registration, payment details and abstracts (cascade).
+create or replace function public.remove_user(target uuid) returns void
+language plpgsql security definer set search_path = public, auth as $$
+begin
+  if not public.is_admin() then raise exception 'Only admins can do this.'; end if;
+  if target = auth.uid() then raise exception 'You cannot remove your own account.'; end if;
+  if exists (select 1 from public.profiles where id = target and is_admin) then
+    raise exception 'Remove this person''s admin access before deleting them.';
+  end if;
+  delete from auth.users where id = target;
+end $$;
+
+revoke all on function public.set_admin(uuid, boolean) from public, anon;
+revoke all on function public.remove_user(uuid) from public, anon;
+grant execute on function public.set_admin(uuid, boolean) to authenticated;
+grant execute on function public.remove_user(uuid) to authenticated;
+
+-- Let admins delete uploaded files (payment proofs, abstract files) when removing a person
+drop policy if exists "admin delete files" on storage.objects;
+create policy "admin delete files" on storage.objects for delete to authenticated
+  using (bucket_id in ('payment-proofs','abstract-files') and public.is_admin());

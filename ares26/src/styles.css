@@ -402,3 +402,21 @@ footer a:focus-visible{outline-color:#fff}
 .ov{max-width:100%;overflow-x:auto}
 #root>div>*{width:100%}
 .w.sec>div[style*="space-between"]{align-items:center;margin-bottom:8px}
+
+/* admin: danger button, abstract status tracker */
+.btn.dng{color:#9b2318;border-color:#f0c9c4}.btn.dng:hover:not(:disabled){background:#fdf0ee;border-color:#9b2318;color:#9b2318}
+.btn:disabled{cursor:not-allowed}
+.astat .trk{list-style:none;display:flex;gap:6px;margin:6px 0 12px;padding:0}
+.astat .trk li{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.78rem;color:var(--mut);text-align:center;position:relative}
+.astat .trk li::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:2px;background:var(--bd);z-index:0}
+.astat .trk li:first-child::before{display:none}
+.astat .trk li i{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:.8rem;background:#fff;border:2px solid var(--bd)}
+.astat .trk li.done i,.astat .trk li.cur i{background:var(--p);border-color:var(--p);color:#fff}
+.astat .trk li.done::before,.astat .trk li.cur::before{background:var(--p)}
+.astat .trk li.cur span{color:var(--pd);font-weight:600}
+.astat.Accepted .trk li.cur i,.astat.Accepted .trk li.done i{background:#14612a;border-color:#14612a}
+.astat.Accepted .trk li.done::before,.astat.Accepted .trk li.cur::before{background:#14612a}
+.astat.Rejected .trk li.cur i{background:#9b2318;border-color:#9b2318}
+.astat.Rejected .trk li.cur::before{background:#9b2318}
+.astat .amsg{margin:0;padding:10px 14px;border-radius:10px;background:var(--p3);color:var(--pd);font-size:.92rem}
+.astat.Accepted .amsg{background:#d7f0dd;color:#14612a}.astat.Rejected .amsg{background:#fdf0ee;color:#9b2318}
