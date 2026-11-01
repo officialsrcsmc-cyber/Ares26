@@ -8,6 +8,7 @@ import Reset from './pages/Reset.js';
 import Abstracts from './pages/Abstracts.js';
 import Dashboard from './pages/Dashboard.js';
 import Admin from './pages/Admin.js';
+import Teams from './pages/Teams.js';
 
 const Head=(e,t)=>h`<div class="ab-top"><p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>${e}</span></p><h1 class="ab-title">${t}</h1></div>`;
 const Txt=(t,b)=>()=>h`<div class="w sec ab txt">${Head("INFORMATION",t)}<div class="ab-note"><p>${b}</p></div></div>`;
@@ -15,7 +16,7 @@ const Txt=(t,b)=>()=>h`<div class="w sec ab txt">${Head("INFORMATION",t)}<div cl
 const AdminGate=P=>{if(P.session===undefined||(P.session&&P.profile===undefined))return h`<div class="w sec"><p class="mut">Loading...</p></div>`;
  return P.profile&&P.profile.is_admin?h`<${Admin} ...${P}/>`:h`<div class="w sec ab nf"><p class="nf-code" aria-hidden="true">404</p><h1 class="ab-title">This page doesn’t exist</h1><p class="mut">The link may be broken or the page may have moved.</p><button class="btn" onClick=${()=>P.go("home")}>Go home</button></div>`};
 
-const PAGES={home:Home,register:Registration,login:Login,reset:Reset,abstracts:Abstracts,dashboard:Dashboard,"ares-admin":AdminGate,
+const PAGES={home:Home,register:Registration,login:Login,reset:Reset,abstracts:Abstracts,teams:Teams,dashboard:Dashboard,"ares-admin":AdminGate,
 faqs:P=>h`<div class="w sec ab">${Head("FREQUENTLY ASKED","FAQs")}<${Faq} ct=${P.ct}/></div>`,
 workshops:Txt("Workshops","Coming soon. Hands-on workshop details, schedule and enrolment will be posted here."),
 terms:Txt("Terms of use","Placeholder. The organizing committee will publish the full Terms of Use before registration opens."),

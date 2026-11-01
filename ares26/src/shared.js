@@ -6,6 +6,8 @@ export{useState,useEffect,LOGO,LOGO_LIGHT};
 const fixProps=p=>{if(!p)return p;p={...p};if(typeof p.style==="string"){p.style=Object.fromEntries(p.style.split(";").filter(x=>x.includes(":")).map(x=>{const i=x.indexOf(":");return[x.slice(0,i).trim().replace(/-([a-z])/g,(m,c)=>c.toUpperCase()),x.slice(i+1).trim()]}))}if(p.class!=null){p.className=p.class;delete p.class}return p};
 export const h=htm.bind((t,p,...c)=>React.createElement(t,fixProps(p),...c));
 export const BANK="Bank, account title and account number will be announced by the organizing committee.";
+export const FEES=[["SMC Students",500,"smc"],["Non SMC",1200,"non"],["With Ambassador Code",800,"amb"],["Post Graduate",1000,"pg"]];
+export const ACCTS=[["JazzCash","03227149136","Muhammad Akram"],["Easypaisa","03471786686","M. Ahsan Zubair"]];
 export const DISC=["Medicine & Allied","Surgery & Allied","Pediatrics","Obstetrics & Gynecology","Public Health","Psychiatry & Psychology","Basic Medical Sciences","Medical Education","AI in Healthcare"];
 export const SECT=["Introduction","Methodology","Results","Conclusion"];
 export const DEF={dates:[["Oct 31","Registration opens","2026-10-31"],["Oct 31","Abstract submission opens","2026-10-31"],["Nov 9","Registration closes","2026-11-09"],["Nov 9","Abstract submission deadline","2026-11-09"],["Nov 14","Notification of acceptance","2026-11-14"],["Nov 19","Final PowerPoint / poster due","2026-11-19"],["Nov 21","ARES’26 main event","2026-11-21"]],

@@ -47,3 +47,4 @@ Uses Resend (resend.com). Install the Supabase CLI, then:
 - Edit the bank details text (`BANK`) in `src/shared.js`.
 - Passwords are handled by Supabase Auth; the site never stores them.
 - Free-tier projects pause after a week of no activity. Open the dashboard occasionally, or upgrade before the event.
+- **Ambassador codes / payment update:** run `supabase/ambassador.sql` once in the SQL Editor (already included at the bottom of `schema.sql` for new setups). Without it, the Ambassador Code field and admin tab will show errors.

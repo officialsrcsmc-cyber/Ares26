@@ -1,9 +1,9 @@
-import {useState,useEffect,h,num,LOGO,BANK,DISC,SECT,left} from '../shared.js';
+import {useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,DISC,SECT,left} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 export default function Dashboard(P){
 const{session,profile,abs,go,logout,refresh,ct}=P;
-const[f,setF]=useState({}),[file,setFile]=useState(null),[err,setErr]=useState(""),[busy,setBusy]=useState(false);
+const[f,setF]=useState({}),[file,setFile]=useState(null),[err,setErr]=useState(""),[busy,setBusy]=useState(false),[cv,setCv]=useState(null),[cbusy,setCbusy]=useState(false),[cpy,setCpy]=useState("");
 if(session===undefined||(session&&profile===undefined))return h`<div class="dash"><p class="mut">Loading...</p></div>`;
 if(!session)return h`<div class="auth"><h2>Dashboard</h2><p class="sub">Log in to see your registration and abstracts.</p><div class="panel"><button class="btn block" onClick=${()=>go("login")}>Log in</button></div></div>`;
 if(!profile)return h`<div class="auth"><h2>Dashboard</h2><p class="sub">We could not load your registration. Try refreshing the page, or log out and back in.</p><div class="panel"><button class="btn o block" onClick=${logout}>Log out</button></div></div>`;
@@ -19,13 +19,18 @@ const a0=abs[0];
 const absChip=a0?(a0.status==="Accepted"?a0.category+" presenter":"Abstract "+a0.status.toLowerCase()):"";
 const ref=String(profile.id).replace(/-/g,"").slice(0,6).toUpperCase();
 const needPay=!profile.proof_path||profile.status==="Rejected";
+const code=(f.amb||"").trim().toUpperCase();
+const checkCode=async()=>{if(!code)return;setCbusy(true);const{data,error}=await sb.rpc("check_ambassador_code",{c:code});setCbusy(false);setCv(error?false:!!data);return !error&&!!data};
+const copy=async(k,v)=>{try{await navigator.clipboard.writeText(v);setCpy(k);setTimeout(()=>setCpy(""),1800)}catch(e){}};
 const pay=async()=>{
  if(!f.txd||!f.acct||!f.amt||!f.tid||!file)return setErr("Fill in every field and choose your payment proof.");
  if(file.size>MAX_FILE)return setErr("File is larger than 5 MB.");
+ if(code){const ok=cv===true?true:await checkCode();if(!ok)return setErr("This ambassador code was not recognised. Check it or clear the field.")}
  setErr("");setBusy(true);
  try{const path=await upload("payment-proofs",profile.id,file);
-  const{error}=await sb.from("profiles").update({tx_date:new Date(f.txd).toISOString(),account_name:f.acct.trim(),amount:Number(f.amt),tx_id:f.tid.trim(),proof_path:path}).eq("id",profile.id);
-  if(error)throw error;setF({});setFile(null);await refresh()}
+  const row={tx_date:new Date(f.txd).toISOString(),account_name:f.acct.trim(),amount:Number(f.amt),tx_id:f.tid.trim(),proof_path:path};if(code)row.ambassador_code=code;
+  const{error}=await sb.from("profiles").update(row).eq("id",profile.id);
+  if(error)throw error;setF({});setFile(null);setCv(null);await refresh()}
  catch(e){setErr(e.message||"Upload failed. Try again.")}
  setBusy(false)};
 return h`<div class="dash">
@@ -41,8 +46,10 @@ return h`<div class="dash">
 ${cd&&h`<div class="cd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${cd}</div>`}</div>
 </section>
 ${needPay?h`<section class="dsec"><h3>${profile.status==="Rejected"?"Payment rejected: upload a new proof":"Complete your registration: payment"}</h3>
-<div class="item"><b>Payment instructions</b><p class="mut" style="margin:6px 0 0">${BANK} Pay the fee, then enter the transfer details below.</p></div>
+<div class="pf-sec"><p class="ab-lbl">Registration fee</p><div class="pf-grid">${FEES.map(([l,v,k])=>h`<div class=${"pf-card"+(k==="amb"?" dk":"")+((k==="smc"&&profile.smc)||(k==="non"&&!profile.smc)?" me":"")} key=${k}><span class="ab-ico sm"><${Ic} n=${k==="amb"?"heart":k==="pg"?"user":"users"}/></span><div><p class="ab-lbl">${l}</p><p class="ab-val">PKR ${v.toLocaleString("en-US")}</p>${((k==="smc"&&profile.smc)||(k==="non"&&!profile.smc))&&h`<span class="ab-pill">Your category</span>`}</div></div>`)}</div></div>
+<div class="pf-sec"><p class="ab-lbl">Send payment to</p><div class="pf-grid">${ACCTS.map(([b,n,o])=>h`<div class="pf-card acct" key=${b}><span class="ab-ico sm"><${Ic} n="phone"/></span><div class="pf-body"><p class="ab-lbl">${b}</p><p class="ab-val pf-num">${n}</p><p class="ab-txt">${o}</p></div><button type="button" class="btn o s" onClick=${()=>copy(b,n)}>${cpy===b?"Copied ✓":"Copy"}</button></div>`)}</div><p class="mut" style="font-size:.9rem;margin:10px 0 0">Pay the fee, then enter the transfer details below.</p></div>
 <div class="panel">${I("Transaction date & time","txd","datetime-local")}${I("Account name","acct")}<label>Amount (PKR)<input type="text" inputMode="decimal" autoComplete="off" value=${f.amt||""} onInput=${e=>{e.target.value=num(e.target.value);set("amt")(e)}}/></label>${I("Transaction ID","tid")}
+<label>Ambassador Code (optional)<div class="amb-in"><input value=${f.amb||""} placeholder="Enter code if you have one" autoComplete="off" onInput=${e=>{set("amb")(e);setCv(null)}}/>${code&&h`<button type="button" class="btn o s" disabled=${cbusy} onClick=${checkCode}>${cbusy?"Checking...":"Verify"}</button>`}${cv===true&&h`<span class="amb-ok" role="status" aria-label="Code valid">✓</span>`}</div>${cv===true&&h`<span class="amb-msg ok">Valid code. The ambassador fee of PKR 800 applies.</span>`}${cv===false&&h`<span class="amb-msg bad">Code not recognised.</span>`}</label>
 <label>Payment proof (image or PDF, max 5 MB)<input type="file" accept="image/*,.pdf" onChange=${e=>setFile(e.target.files[0]||null)}/></label>
 ${err&&h`<div class="err" role="alert">${err}</div>`}<button class="btn block" disabled=${busy} onClick=${pay}>${busy?"Uploading...":"Submit payment"}</button></div></section>`
 :h`<section class="dsec"><h3>Payment</h3><div class="item"><dl class="kv"><dt>Amount</dt><dd>PKR ${profile.amount}</dd><dt>Transaction ID</dt><dd>${profile.tx_id}</dd><dt>Status</dt><dd><span class=${"badge "+profile.status}>${profile.status}</span></dd></dl>${profile.status==="Pending"?h`<p class="mut" style="margin:10px 0 0;font-size:.9rem">Proof received. The team is verifying it.</p>`:""}</div></section>`}
