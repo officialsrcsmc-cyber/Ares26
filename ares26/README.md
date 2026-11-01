@@ -48,3 +48,4 @@ Uses Resend (resend.com). Install the Supabase CLI, then:
 - Passwords are handled by Supabase Auth; the site never stores them.
 - Free-tier projects pause after a week of no activity. Open the dashboard occasionally, or upgrade before the event.
 - **Ambassador codes:** the codes are hard-coded in `src/shared.js` (the `AMB` list). Run `supabase/ambassador.sql` once in the SQL Editor so the entered code can be saved with the payment.
+- **UHS / SMC ID:** run `supabase/uhs_id.sql` once in the SQL Editor so the ID entered by SMC students is saved.
