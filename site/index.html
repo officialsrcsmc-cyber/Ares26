@@ -19,7 +19,6 @@
     <nav>
       <a href="#mission">Mission</a>
       <a href="#what-we-do">What we do</a>
-      <a href="#events">Events</a>
       <a href="#publications">Publications</a>
       <a href="/ares26/" class="on">ARES'26</a>
     </nav>
@@ -30,7 +29,6 @@
   <nav class="mnav" id="mnav">
     <a href="#mission">Mission</a>
     <a href="#what-we-do">What we do</a>
-    <a href="#events">Events</a>
     <a href="#publications">Publications</a>
     <a href="/ares26/" class="on">ARES'26</a>
   </nav>
@@ -110,48 +108,12 @@
   </div>
 </section>
 
-<!-- 6c. UPCOMING EVENTS (dates from the ARES'26 app) -->
-<section id="events" class="sec band reveal">
-  <div class="w">
-    <div class="sec-head"><h2>Upcoming events</h2><p class="mut">Key dates leading up to ARES'26.</p></div>
-    <ul class="events">
-      <li class="event" data-date="2026-11-10"><div class="edate"><b>10</b><span>Nov</span></div><div><h3>Registration opens</h3><p>ARES'26 registration</p></div></li>
-      <li class="event" data-date="2026-11-14"><div class="edate"><b>14</b><span>Nov</span></div><div><h3>Early bird deadline</h3><p>ARES'26 registration</p></div></li>
-      <li class="event" data-date="2026-11-16"><div class="edate"><b>16</b><span>Nov</span></div><div><h3>Abstract submission closes</h3><p>Date to be confirmed</p></div></li>
-      <li class="event" data-date="2026-11-20"><div class="edate"><b>20</b><span>Nov</span></div><div><h3>Workshops</h3><p>Date to be confirmed</p></div></li>
-      <li class="event main" data-date="2026-11-21"><div class="edate"><b>21</b><span>Nov</span></div><div><h3>ARES'26 main event</h3><p>Sargodha Medical College</p></div></li>
-    </ul>
-    <div class="events-cta"><a class="btn" href="/ares26/">Register for ARES'26</a></div>
-  </div>
-</section>
-
 <section id="publications" class="sec reveal">
   <div class="w">
     <h2>Publications</h2>
     <div class="card">
       <h3>Student research &amp; highlights</h3>
       <p class="mut">Work produced by SRC members — papers, case reports and reviews — will be featured here as it is published.</p>
-    </div>
-  </div>
-</section>
-
-<!-- 6d. TEAM CAROUSEL (placeholder names: replace) -->
-<section id="team" class="sec band reveal">
-  <div class="w">
-    <div class="car-head">
-      <div class="sec-head"><h2>Our team</h2><p class="mut">The students behind SRC.</p></div>
-      <div class="car-btns">
-        <button class="car-btn" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="car-btn" id="next" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
-      </div>
-    </div>
-    <div class="car" id="car" tabindex="0" role="region" aria-label="Team members">
-      <div class="member"><div class="av">TM</div><b>Team Member 1</b><span>Role / Title</span></div>
-      <div class="member"><div class="av">TM</div><b>Team Member 2</b><span>Role / Title</span></div>
-      <div class="member"><div class="av">TM</div><b>Team Member 3</b><span>Role / Title</span></div>
-      <div class="member"><div class="av">TM</div><b>Team Member 4</b><span>Role / Title</span></div>
-      <div class="member"><div class="av">TM</div><b>Team Member 5</b><span>Role / Title</span></div>
-      <div class="member"><div class="av">TM</div><b>Team Member 6</b><span>Role / Title</span></div>
     </div>
   </div>
 </section>
@@ -181,7 +143,6 @@
       <h3>Quick Links</h3>
       <p><a href="#top">Home</a></p>
       <p><a href="#mission">Mission</a></p>
-      <p><a href="#team">Team</a></p>
       <p><a href="/ares26/">ARES'26</a></p>
     </div>
   </div>
@@ -216,21 +177,6 @@
   if(d>1){cd.textContent='Starts in '+d+' days';cd.hidden=false}
   else if(d===1){cd.textContent='Starts tomorrow';cd.hidden=false}
   else if(d===0){cd.textContent='Happening today';cd.hidden=false}
-
-  // Dim events that have already passed
-  document.querySelectorAll('.event').forEach(function(li){
-    if(daysUntil(li.getAttribute('data-date'))<0)li.classList.add('past');
-  });
-
-  // Team carousel arrows
-  var car=document.getElementById('car');
-  function step(dir){var c=car.querySelector('.member');car.scrollBy({left:dir*(c.offsetWidth+16),behavior:'smooth'})}
-  document.getElementById('prev').addEventListener('click',function(){step(-1)});
-  document.getElementById('next').addEventListener('click',function(){step(1)});
-  car.addEventListener('keydown',function(e){
-    if(e.key==='ArrowRight'){e.preventDefault();step(1)}
-    if(e.key==='ArrowLeft'){e.preventDefault();step(-1)}
-  });
 
   // Fade-in on scroll
   var els=document.querySelectorAll('.reveal');
