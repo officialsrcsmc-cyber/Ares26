@@ -1,4 +1,4 @@
-import {useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,DISC,SECT,left} from '../shared.js';
+import {useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,ambFind,DISC,SECT,left} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 export default function Dashboard(P){
@@ -20,12 +20,12 @@ const absChip=a0?(a0.status==="Accepted"?a0.category+" presenter":"Abstract "+a0
 const ref=String(profile.id).replace(/-/g,"").slice(0,6).toUpperCase();
 const needPay=!profile.proof_path||profile.status==="Rejected";
 const code=(f.amb||"").trim().toUpperCase();
-const checkCode=async()=>{if(!code)return;setCbusy(true);const{data,error}=await sb.rpc("check_ambassador_code",{c:code});setCbusy(false);setCv(error?false:!!data);return !error&&!!data};
+const checkCode=()=>{if(!code)return false;const ok=!!ambFind(code);setCv(ok);return ok};
 const copy=async(k,v)=>{try{await navigator.clipboard.writeText(v);setCpy(k);setTimeout(()=>setCpy(""),1800)}catch(e){}};
 const pay=async()=>{
  if(!f.txd||!f.acct||!f.amt||!f.tid||!file)return setErr("Fill in every field and choose your payment proof.");
  if(file.size>MAX_FILE)return setErr("File is larger than 5 MB.");
- if(code){const ok=cv===true?true:await checkCode();if(!ok)return setErr("This ambassador code was not recognised. Check it or clear the field.")}
+ if(code){const ok=cv===true?true:checkCode();if(!ok)return setErr("This ambassador code was not recognised. Check it or clear the field.")}
  setErr("");setBusy(true);
  try{const path=await upload("payment-proofs",profile.id,file);
   const row={tx_date:new Date(f.txd).toISOString(),account_name:f.acct.trim(),amount:Number(f.amt),tx_id:f.tid.trim(),proof_path:path};if(code)row.ambassador_code=code;

@@ -8,6 +8,25 @@ export const h=htm.bind((t,p,...c)=>React.createElement(t,fixProps(p),...c));
 export const BANK="Bank, account title and account number will be announced by the organizing committee.";
 export const FEES=[["SMC Students",500,"smc"],["Non SMC",1200,"non"],["With Ambassador Code",800,"amb"],["Post Graduate",1000,"pg"]];
 export const ACCTS=[["JazzCash","03227149136","Muhammad Akram"],["Easypaisa","03471786686","M. Ahsan Zubair"]];
+// Ambassador codes: [code, ambassador, college]. Hard-coded, edit here to add or remove.
+export const AMB=[
+["ARES-SH-101","Sahrish Hayat","Niazi Medical & Dental College, Sargodha"],
+["ARES-MI-102","Misbah Iqbal","Faisalabad Medical University"],
+["ARES-HA-103","Hamid Ali Khan","Rawalpindi Medical University"],
+["ARES-HA-104","Hadia Asif","Rai Medical College"],
+["ARES-MN-106","Muhammad Nuaman Umer Malik","Rai Medical College"],
+["ARES-RZ-107","Rania Zafar","Niazi Medical & Dental College, Sargodha"],
+["ARES-HM-108","Hafiz Mahboob Ashraf","Sheikh Zayed Medical College, Rahim Yar Khan"],
+["ARES-AS-109","Aamina Sohail","Rawalpindi Medical University"],
+["ARES-MA-110","Muhammad Awais","Poonch Medical College, Rawalakot"],
+["ARES-MF-111","Mirza Faaz Baig","Ameer-ud-Din Medical College, Lahore"],
+["ARES-FR-113","Faisal Rasheed","Rawalpindi Medical University"],
+["ARES-AA-114","Ayesha Fatima","Gujranwala Medical College, Gujranwala"],
+["ARES-MA-115","Muhammad Azlan","CMH Lahore Medical College"],
+["ARES-AE-116","Alina Essa","Quaid-e-Azam Medical College, Bahawalpur"],
+["ARES-MN-117","Maria Nawaz","Fatima Jinnah Medical University, Lahore"],
+["ARES-AA-118","Aleeza","Faisalabad Medical University"]];
+export const ambFind=c=>{const k=String(c||"").trim().toUpperCase();return AMB.find(a=>a[0]===k)||null};
 export const DISC=["Medicine & Allied","Surgery & Allied","Pediatrics","Obstetrics & Gynecology","Public Health","Psychiatry & Psychology","Basic Medical Sciences","Medical Education","AI in Healthcare"];
 export const SECT=["Introduction","Methodology","Results","Conclusion"];
 export const DEF={dates:[["Oct 31","Registration opens","2026-10-31"],["Oct 31","Abstract submission opens","2026-10-31"],["Nov 9","Registration closes","2026-11-09"],["Nov 9","Abstract submission deadline","2026-11-09"],["Nov 14","Notification of acceptance","2026-11-14"],["Nov 19","Final PowerPoint / poster due","2026-11-19"],["Nov 21","ARES’26 main event","2026-11-21"]],
