@@ -51,6 +51,4 @@ export default function Home(P){const{ct,go}=P;return h`<div>
 
 <section class="sec w" aria-labelledby="hm-core"><${Head} t="Core Team – ARES’26" id="hm-core"/>${CORE.map(([role,names])=>h`<div class="core-grp" key=${role}><h3 class="core-role">${role}</h3><div class="core-row">${names.map(n=>h`<div class="card tm" key=${n}><div class="av">${coreInit(n)}</div><b>${n}</b></div>`)}</div></div>`)}<div class="core-more"><button class="btn" onClick=${()=>go("teams")}>See Full Team</button></div></section>
 
-<section class="sec w" aria-labelledby="hm-team"><${Head} t="Our team" id="hm-team"/><div class="g c5 team">${ct.team.map(([n,r],i)=>h`<div class="card tm" key=${i}><div class="av">${initials(n)}</div><b>${n}</b><div class="mut">${r}</div></div>`)}</div></section>
-
 <section class="sec w" style="padding-top:0" aria-labelledby="hm-faq"><${Head} t="FAQs" id="hm-faq"/><${Faq} ct=${ct}/></section></div>`}
