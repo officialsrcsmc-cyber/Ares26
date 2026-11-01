@@ -25,7 +25,9 @@ export const AMB=[
 ["ARES-MA-115","Muhammad Azlan","CMH Lahore Medical College"],
 ["ARES-AE-116","Alina Essa","Quaid-e-Azam Medical College, Bahawalpur"],
 ["ARES-MN-117","Maria Nawaz","Fatima Jinnah Medical University, Lahore"],
-["ARES-AA-118","Aleeza","Faisalabad Medical University"]];
+["ARES-AA-118","Aleeza","Faisalabad Medical University"],
+["ARES-RMH-119","Rana Muhammad Haris","BDS, Niazi Medical College"],
+["ARES-MS-120","Missal Sarwar","UMDC"]];
 export const ambFind=c=>{const k=String(c||"").trim().toUpperCase();return AMB.find(a=>a[0]===k)||null};
 export const DISC=["Medicine & Allied","Surgery & Allied","Pediatrics","Obstetrics & Gynecology","Public Health","Psychiatry & Psychology","Basic Medical Sciences","Medical Education","AI in Healthcare"];
 export const SECT=["Introduction","Methodology","Results","Conclusion"];
