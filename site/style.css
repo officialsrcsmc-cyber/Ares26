@@ -178,3 +178,6 @@ footer a:hover{color:#fff;text-decoration:underline}
 .social a:hover{background:#fff;color:var(--p-dark);transform:translateY(-2px);text-decoration:none}
 .social svg{width:18px;height:18px;stroke:currentColor}
 .ft-bottom{margin-top:var(--s4);padding-top:var(--s2);border-top:1px solid rgba(255,255,255,.18);font-size:.8rem;text-align:center;color:#c9b9de}
+
+.ft-credit{margin-top:8px;font-size:.85rem;color:#cdbbe3}
+.ft-credit a{color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:3px}

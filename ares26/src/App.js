@@ -62,4 +62,5 @@ ${sb?h`<${Page} ...${P}/>`:h`<${Setup}/>`}
 <div class="ft-col"><h3>Quick Links</h3><p><a href="#home" onClick=${e=>{e.preventDefault();go("home")}}>Home</a></p><p><a href="#register" onClick=${e=>{e.preventDefault();go("register")}}>Register</a></p><p><a href="#abstracts" onClick=${e=>{e.preventDefault();go("abstracts")}}>Submit abstract</a></p><p><a href="#terms" onClick=${e=>{e.preventDefault();go("terms")}}>Terms of use</a></p><p><a href="#conduct" onClick=${e=>{e.preventDefault();go("conduct")}}>Code of conduct</a></p><p><a href="/">← Back to SRC</a></p></div>
 </div>
 <div class="w ft-bottom">© 2026 SRC – Sargodha Medical College. All rights reserved.</div>
+<div class="w ft-credit">Made by <a href="https://hadbie-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer">Hassan Farooq</a></div>
 </footer></div>`}
