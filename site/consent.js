@@ -57,7 +57,9 @@
     var l = document.createElement('link'); l.id = 'cc-css'; l.rel = 'stylesheet'; l.href = '/consent.css';
     document.head.appendChild(l);
   }
+  function seen() { try { return sessionStorage.getItem('src_consent_seen') === '1'; } catch (e) { return false; } }
   function close() {
+    try { sessionStorage.setItem('src_consent_seen', '1'); } catch (e) {}
     if (el) { el.remove(); el = null; }
     document.body.classList.remove('consent-open');
     if (lastFocus && lastFocus.focus) lastFocus.focus({preventScroll:true});
@@ -81,7 +83,7 @@
         ? '<div class="cc-opt"><input type="checkbox" checked disabled id="cc-e"/><label for="cc-e"><b>Essential</b><span>Keeps you signed in to ARES\u201926 and remembers this choice. Always on.</span></label></div>' +
           '<div class="cc-opt"><input type="checkbox" id="cc-a"' + (cur && cur.analytics && !gpc ? ' checked' : '') + (gpc ? ' disabled' : '') + '/><label for="cc-a"><b>Analytics</b><span>Counts visits and clicks on key buttons so we can improve the site. Off by default.</span></label></div>' +
           '<div class="cc-row"><button type="button" class="cc-btn" id="cc-save">Save preferences</button><button type="button" class="cc-btn o" id="cc-cancel">Cancel</button></div>'
-        : '<div class="cc-row"><button type="button" class="cc-btn" id="cc-acc"' + (gpc ? ' disabled' : '') + '>Accept analytics</button><button type="button" class="cc-btn" id="cc-rej">Reject non-essential</button><button type="button" class="cc-btn o" id="cc-pref">Preferences</button></div>') +
+        : '<div class="cc-row"><button type="button" class="cc-btn" id="cc-acc"' + (gpc ? ' disabled' : '') + '>Accept all</button><button type="button" class="cc-btn" id="cc-rej">Reject non-essential</button><button type="button" class="cc-btn o" id="cc-pref">Preferences</button></div>') +
       '</div>';
     document.body.appendChild(el);
     document.body.classList.add('consent-open');
@@ -104,6 +106,7 @@
     if (e.target.closest && e.target.closest('[data-cookie-settings]')) { e.preventDefault(); open(true); }
   });
 
-  function init() { if (read()) loadAnalytics(); else open(false); }
+  // The banner is shown every time the site is opened (once per browser session); an earlier choice only pre-sets the analytics preference.
+  function init() { if (read()) loadAnalytics(); if (!seen()) open(false); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

@@ -587,3 +587,6 @@ body::before{z-index:101}
 .af .af-cnt{background:none;padding:0;border-left:0;box-shadow:none}
 .af-dl.lv-ok{background:var(--pd)}
 .af-actions .btn{white-space:nowrap}.af-b-back{flex:.8!important}
+
+.linkbtn{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:24px}
+.linkbtn:hover{opacity:.85}
