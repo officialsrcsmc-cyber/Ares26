@@ -52,7 +52,7 @@ const logout=async()=>{await sb.auth.signOut();setProfile(null);setA([]);go("hom
 const P={go,sb,session,profile,refresh,logout,abs,ct,setC},Page=PAGES[pg]||Home;
 const nav=(k,l,mob)=>h`<a key=${k} href=${"#"+k} class=${pg==k?"on":""} aria-current=${pg==k?"page":undefined} onClick=${e=>{e.preventDefault();go(k)}}>${l}</a>`;
 const adm=profile&&profile.is_admin;
-return h`<div><header><div class="w hd"><a href="#home" class="brand" aria-label="ARES’26 home" onClick=${e=>{e.preventDefault();go("home")}}><img src=${LOGO_LIGHT} alt="ARES’26"/></a><div class="sp"/><nav aria-label="Main">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>
+return h`<div><header class=${pg==="abstracts"?"hd-static":""}><div class="w hd"><a href="#home" class="brand" aria-label="ARES’26 home" onClick=${e=>{e.preventDefault();go("home")}}><img src=${LOGO_LIGHT} alt="ARES’26"/></a><div class="sp"/><nav aria-label="Main">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>
 <a href="#register" class="btn s reg" onClick=${e=>{e.preventDefault();go("register")}}>Register now</a><button type="button" class="burger bg" aria-label=${menu?"Close menu":"Open menu"} aria-expanded=${menu} aria-controls="mobile-menu" onClick=${()=>setMenu(!menu)}><span class=${"bars"+(menu?" x":"")}><i/><i/><i/></span></button></div>
 ${menu&&h`<nav class="mn" id="mobile-menu" aria-label="Mobile">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>`}</header>
 ${sb?h`<${Page} ...${P}/>`:h`<${Setup}/>`}

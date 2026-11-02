@@ -1,4 +1,4 @@
-import {useState,useEffect,h,BANK,DISC,SECT,left,Ic,Acc} from '../shared.js';
+import {useState,useEffect,useRef,h,BANK,DISC,SECT,left,Ic,Acc} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 const FMT=[["Word limit","Max 300 words (excl. title, keywords, author details)"],["Font","Arial or Calibri, size 12"],["Spacing","Single line spacing (1.0)"],["Language","English"],["File format","MS Word — .doc or .docx"]];
@@ -64,41 +64,147 @@ return h`<li key=${i}><span class="ab-num" aria-hidden="true">${i+1}</span><div 
 <//>
 </div>`};
 
+/* ---------- Submission form: 4-step flow ---------- */
+const LIM_WORDS=300,LIM_TITLE=150,MAXA=10,DKEY="ares26_abstract_draft_v2:";
+const STEP_NAMES=["Details","Authors","Abstract","Review"];
+const ORD=["First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth"];
+const INIT={title:"",disc:DISC[0],cat:"Oral",Introduction:"",Methodology:"",Results:"",Conclusion:""};
+const blankAu=()=>({n:"",e:"",a:""});
+const wc=s=>{const t=(s||"").trim();return t?t.split(/\s+/).length:0};
+const emailOk=v=>/^\S+@\S+\.\S+$/.test(v);
+const lvl=(n,max)=>n>max?"lv-over":n>=max*0.9?"lv-warn":"lv-ok";
+const grow=el=>{if(!el)return;el.style.height="auto";el.style.height=(el.scrollHeight+2)+"px"};
+const STEP_KEYS=(au)=>({1:["title"],2:au.flatMap((_,i)=>["n"+i,"e"+i,"a"+i]),3:[...SECT,"total"]});
+
 export default function Abstracts(P){
-const{session,profile,go,refresh,ct}=P;const[f,setF]=useState({disc:DISC[0],cat:"Oral"}),[file,setFile]=useState(null),[err,setErr]=useState(""),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[au,setAu]=useState([{n:"",e:"",a:""}]);
-const ORD=["First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth"],MAXA=10;
-const setA=(i,k)=>e=>setAu(au.map((x,j)=>j===i?{...x,[k]:e.target.value}:x));
-const set=k=>e=>setF({...f,[k]:e.target.value});
-const sub=async()=>{
- if(!(f.title||"").trim()||SECT.some(s=>!(f[s]||"").trim()))return setErr("Add a title and complete every section.");
- const A=au.map(x=>({name:x.n.trim(),email:x.e.trim(),affiliation:x.a.trim()}));
- if(A.some((x,i)=>!x.name||!x.email||!x.affiliation))return setErr("Complete the name, email and affiliation for every author, or remove the extra author boxes.");
- if(A.some(x=>!/^\S+@\S+\.\S+$/.test(x.email)))return setErr("Enter a valid email address for every author.");
- if(file&&file.size>MAX_FILE)return setErr("File is larger than 5 MB.");
+const{session,profile,go,refresh,ct}=P;const uid=session&&session.user&&session.user.id;
+const[f,setF]=useState(INIT),[au,setAu]=useState([blankAu()]),[pres,setPres]=useState(0),[step,setStep]=useState(1),[touched,setT]=useState({}),
+[file,setFile]=useState(null),[err,setErr]=useState(""),[busy,setBusy]=useState(false),[done,setDone]=useState(null),
+[loaded,setLoaded]=useState(false),[saved,setSaved]=useState("idle"),[restored,setRestored]=useState(false);
+const hadDraft=useRef(false),topRef=useRef(null);
+
+/* --- restore draft --- */
+useEffect(()=>{if(!uid)return;let d=null;try{d=JSON.parse(localStorage.getItem(DKEY+uid)||"null")}catch(e){}
+ if(d&&d.f){hadDraft.current=true;setF({...INIT,...d.f});setAu(Array.isArray(d.au)&&d.au.length?d.au:[blankAu()]);setPres(Number(d.pres)||0);setStep(Math.min(4,Math.max(1,Number(d.step)||1)));setRestored(true);setSaved("saved")}
+ setLoaded(true)},[uid]);
+/* --- prefill first author from profile (only when there is no draft) --- */
+useEffect(()=>{if(!loaded||hadDraft.current||!profile)return;
+ setAu(a=>a.length===1&&!a[0].n&&!a[0].e&&!a[0].a?[{n:((profile.first_name||"")+" "+(profile.last_name||"")).trim(),e:profile.email||(session&&session.user.email)||"",a:profile.institution||""}]:a)},[loaded,profile]);
+/* --- debounced autosave --- */
+const draftObj=()=>({f,au,pres,step,at:Date.now()});
+const pf=profile?{n:((profile.first_name||"")+" "+(profile.last_name||"")).trim(),e:profile.email||(session&&session.user.email)||"",a:profile.institution||""}:{n:"",e:"",a:""};
+const isBlank=()=>!f.title&&SECT.every(s=>!f[s])&&au.length===1&&au[0].n===pf.n&&au[0].e===pf.e&&au[0].a===pf.a;
+const write=()=>{try{localStorage.setItem(DKEY+uid,JSON.stringify(draftObj()));setSaved("saved");return true}catch(e){setSaved("error");return false}};
+useEffect(()=>{if(!loaded||!uid||done)return;setSaved(s=>s==="error"?s:"saving");const t=setTimeout(()=>{if(isBlank()){setSaved("idle");return}write()},700);return()=>clearTimeout(t)},[f,au,pres,step,loaded,done]);
+/* --- auto-grow textareas --- */
+useEffect(()=>{document.querySelectorAll(".af-ta").forEach(grow)},[step,loaded,done]);
+
+/* --- validation --- */
+const total=SECT.reduce((n,s)=>n+wc(f[s]),0);
+const E={};
+if(!f.title.trim())E.title="Enter a title for your abstract.";else if(f.title.length>LIM_TITLE)E.title="Title must be "+LIM_TITLE+" characters or fewer.";
+au.forEach((x,i)=>{if(!x.n.trim())E["n"+i]="Enter the author’s full name.";if(!x.a.trim())E["a"+i]="Enter the author’s affiliation.";const em=x.e.trim();
+ if(i===0&&!em)E["e"+i]="Enter the first author’s email.";else if(em&&!emailOk(em))E["e"+i]="Enter a valid email, like name@example.com."});
+SECT.forEach(s=>{if(!wc(f[s]))E[s]="Please complete this section."});
+if(total>LIM_WORDS)E.total="Your abstract is "+(total-LIM_WORDS)+" word"+(total-LIM_WORDS===1?"":"s")+" over the "+LIM_WORDS+"-word limit. Shorten it to continue.";
+const keysFor=n=>STEP_KEYS(au)[n]||[];
+const stepBad=n=>keysFor(n).some(k=>E[k]);
+const touch=keys=>setT(t=>{const x={...t};keys.forEach(k=>x[k]=true);return x});
+const blur=k=>()=>setT(t=>t[k]?t:{...t,[k]:true});
+const focusKey=k=>setTimeout(()=>{const el=document.getElementById("af-"+(k==="total"?"Introduction":k));if(el){el.focus();el.scrollIntoView({block:"center",behavior:"smooth"})}},60);
+const toTop=()=>setTimeout(()=>{const el=topRef.current;if(el){el.scrollIntoView({behavior:"smooth",block:"start"});const hd=el.querySelector("[data-stephead]");if(hd)hd.focus({preventScroll:true})}},40);
+const goStep=n=>{setErr("");setStep(n);toTop()};
+const next=()=>{const ks=keysFor(step);touch(ks);const bad=ks.find(k=>E[k]);if(bad){setErr("");return focusKey(bad)}goStep(step+1)};
+
+const setV=k=>e=>setF(x=>({...x,[k]:e.target.value}));
+const setTa=k=>e=>{grow(e.target);const v=e.target.value;setF(x=>({...x,[k]:v}))};
+const setA=(i,k)=>e=>{const v=e.target.value;setAu(a=>a.map((x,j)=>j===i?{...x,[k]:v}:x))};
+const addAu=()=>{if(au.length>=MAXA)return;setAu([...au,blankAu()]);focusKey("n"+au.length)};
+const rmAu=i=>{setAu(au.filter((_,j)=>j!==i));setPres(p=>p===i?0:p>i?p-1:p);setT(t=>Object.fromEntries(Object.entries(t).filter(([k])=>!/^[nea]\d+$/.test(k))))};
+const pickFile=e=>{const x=e.target.files[0];if(x&&x.size>MAX_FILE){setErr("That file is larger than 5 MB. Choose a smaller one.");e.target.value="";setFile(null)}else{setErr("");setFile(x||null)}};
+const saveNow=()=>{if(write())setSaved("saved")};
+
+/* --- submit --- */
+const submit=async()=>{
+ if(busy)return;
+ const badStep=[1,2,3].find(stepBad);
+ if(badStep){touch([1,2,3].flatMap(keysFor));setErr("Some required details are missing or need fixing. We’ve taken you to the first one.");setStep(badStep);toTop();const k=keysFor(badStep).find(k=>E[k]);if(k)focusKey(k);return}
  setErr("");setBusy(true);
  try{const path=file?await upload("abstract-files",session.user.id,file):null;
-  const{error}=await sb.from("abstracts").insert({user_id:session.user.id,title:f.title.trim(),discipline:f.disc,category:f.cat,body:{...Object.fromEntries(SECT.map(s=>[s,f[s].trim()])),authors:A},file_path:path,status:"Submitted"});
-  if(error)throw error;await refresh();setDone(true)}
- catch(e){setErr(e.message||"Submission failed. Try again.")}
+  const A=au.map((x,i)=>({name:x.n.trim(),email:x.e.trim(),affiliation:x.a.trim(),presenting:i===pres}));
+  const{data,error}=await sb.from("abstracts").insert({user_id:session.user.id,title:f.title.trim(),discipline:f.disc,category:f.cat,body:{...Object.fromEntries(SECT.map(s=>[s,f[s].trim()])),authors:A},file_path:path,status:"Submitted"}).select("id").single();
+  if(error)throw error;
+  try{localStorage.removeItem(DKEY+session.user.id)}catch(e){}
+  const ref="ARES26-ABS-"+String(data&&data.id||Date.now()).replace(/-/g,"").slice(0,8).toUpperCase();
+  setDone({ref,title:f.title.trim(),cat:f.cat,disc:f.disc,words:total,authors:A,fileName:file?file.name:""});
+  setBusy(false);toTop();try{await refresh()}catch(e){}return}
+ catch(e){setErr((e&&e.message)||"Submission failed. Check your connection and try again. Your draft is still saved.")}
  setBusy(false)};
+const again=()=>{setDone(null);setF(INIT);setAu([{n:((profile&&profile.first_name)||"")+" "+((profile&&profile.last_name)||""),e:(profile&&profile.email)||"",a:(profile&&profile.institution)||""}].map(x=>({...x,n:x.n.trim()})));setPres(0);setFile(null);setT({});setErr("");setStep(1);hadDraft.current=false;setRestored(false);setSaved("idle");toTop()};
 
+/* --- field helper --- */
+const F=(k,label,o,ctl)=>{o=o||{};const er=touched[k]&&E[k];
+ const dd=[o.hint&&"af-h-"+k,er&&"af-e-"+k,o.cnt&&"af-c-"+k].filter(Boolean).join(" ");
+ return h`<div class=${"af-f"+(er?" bad":"")} key=${k}><label htmlFor=${"af-"+k}>${label}${o.req&&h`<span class="af-req" aria-hidden="true"> *</span>`}${o.req&&h`<span class="sr"> (required)</span>`}</label>
+${ctl({id:"af-"+k,"aria-invalid":er?"true":"false","aria-describedby":dd||undefined,onBlur:blur(k)})}
+${o.hint&&h`<p class="af-hint" id=${"af-h-"+k}>${o.hint}</p>`}${o.cnt}
+${er&&h`<p class="af-err" id=${"af-e-"+k} role="alert"><${Ic} n="alert" size=${15}/><span>${E[k]}</span></p>`}</div>`};
+const wordCnt=k=>h`<p class=${"af-cnt "+lvl(total,LIM_WORDS)} id=${"af-c-"+k}><span>${wc(f[k])} word${wc(f[k])===1?"":"s"}</span><span>Total ${total} / ${LIM_WORDS}</span></p>`;
+
+/* --- deadline banner --- */
+const de=(ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[]);const dl=de[0]||"",iso=de[2];
+const days=iso?Math.ceil((new Date(iso)-new Date())/864e5):null;
+const dlc=days===null?"lv-ok":days<0?"lv-over":days<=3?"lv-warn":"lv-ok";
+const banner=dl?h`<div class=${"af-dl "+dlc} role="status"><span class="af-dl-i"><${Ic} n="clock" size=${22}/></span><div><b>Abstract deadline: ${dl}${iso?" "+iso.slice(0,4):""}</b><span>${days===null?"":days<0?"The deadline has passed.":days===0?"Last day to submit — closes tonight.":days===1?"1 day remaining":days+" days remaining"}</span></div></div>`:null;
+
+const savedTxt=saved==="saving"?"Saving…":saved==="saved"?"Draft saved":saved==="error"?"Couldn’t save draft (storage blocked)":"";
 let body;
 if(session===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></div>`;
 else if(!session)body=h`<div class="auth"><h2>Abstract submission</h2><p class="sub">You need to be logged in to submit an abstract.</p><div class="panel"><button class="btn block" onClick=${()=>go("login")}>Log in</button></div></div>`;
-else if(done)body=h`<div class="auth"><h2>Abstract submitted</h2><p class="sub">Track its review status on your dashboard.</p><div class="panel"><button class="btn block" onClick=${()=>go("dashboard")}>Go to dashboard</button></div></div>`;
-else{const dl=(ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[])[0]||"TBC";
-body=h`<div class="auth" style="max-width:640px"><h2>Abstract submission</h2><p class="sub">Closes ${dl}.</p><div class="panel">
-<label>Title<input value=${f.title||""} onInput=${set("title")}/></label>
-<div class="au-box"><h3 class="au-h">Authors’ details</h3>${au.map((x,i)=>h`<div class="au-card" key=${i}><div class="au-top"><b>${(ORD[i]||"Author "+(i+1))+" Author"}</b>${i>0&&h`<button type="button" class="btn o s dng" onClick=${()=>setAu(au.filter((_,j)=>j!==i))}>Remove</button>`}</div>
-<label>Name<input value=${x.n} autoComplete="off" onInput=${setA(i,"n")}/></label>
-<label>Email<input type="email" value=${x.e} autoComplete="off" onInput=${setA(i,"e")}/></label>
-<label>Affiliation<input value=${x.a} autoComplete="off" onInput=${setA(i,"a")}/></label></div>`)}
-${au.length<MAXA&&h`<button type="button" class="btn o au-add" onClick=${()=>setAu([...au,{n:"",e:"",a:""}])}>+ Add another author</button>`}</div>
-<label>Discipline<select value=${f.disc} onChange=${set("disc")}>${DISC.map(d=>h`<option key=${d}>${d}</option>`)}</select></label>
-<label>Category<select value=${f.cat} onChange=${set("cat")}><option>Oral</option><option>Poster</option></select></label>
-${SECT.map(s=>h`<label key=${s}>${s}<textarea rows="4" value=${f[s]||""} onInput=${set(s)}/></label>`)}
-<label>Supplementary file (PDF, DOCX or image, max 5 MB)<input type="file" accept=".pdf,.docx,image/*" onChange=${e=>{const x=e.target.files[0];if(x&&x.size>MAX_FILE){setErr("File is larger than 5 MB.");e.target.value="";setFile(null)}else{setErr("");setFile(x||null)}}}/></label>
-${err&&h`<div class="err" role="alert">${err}</div>`}<button class="btn block" disabled=${busy} onClick=${sub}>${busy?"Submitting...":"Submit abstract"}</button></div></div>`}
+else if(done)body=h`<div class="af af-wrap" ref=${topRef}><div class="af-ok"><span class="af-ok-i"><${Ic} n="check" size=${34}/></span><h2 data-stephead tabIndex="-1">Abstract submitted</h2><p class="af-lead">Thank you. Your abstract has been received and will be peer-reviewed. Track its status on your dashboard.</p>
+<div class="af-ref"><span>Reference number</span><b>${done.ref}</b><small>Please keep this for your records.</small></div>
+<dl class="af-sum"><div><dt>Title</dt><dd>${done.title}</dd></div><div><dt>Category</dt><dd>${done.cat} · ${done.disc}</dd></div><div><dt>Authors</dt><dd>${done.authors.map(a=>a.name+(a.presenting?" (presenting)":"")).join(", ")}</dd></div><div><dt>Length</dt><dd>${done.words} words</dd></div>${done.fileName&&h`<div><dt>Attachment</dt><dd>${done.fileName}</dd></div>`}</dl>
+<div class="af-ok-btns"><button class="btn block" onClick=${()=>go("dashboard")}>Go to dashboard</button><button class="btn o block" onClick=${again}>Submit another abstract</button></div></div></div>`;
+else{
+const stepHead=(n,t,sub)=>h`<div class="af-sh"><h2 data-stephead tabIndex="-1">${t}</h2><p>${sub}</p></div>`;
+const edit=n=>h`<button type="button" class="af-edit" onClick=${()=>goStep(n)}>Edit</button>`;
+let content;
+if(step===1)content=h`<div>${stepHead(1,"Abstract details","Tell us what your work is about.")}
+${F("title","Title",{req:1,hint:"Concise and reflective of your research.",cnt:h`<p class=${"af-cnt "+lvl(f.title.length,LIM_TITLE)} id="af-c-title"><span></span><span>${f.title.length} / ${LIM_TITLE} characters</span></p>`},p=>h`<input ...${p} type="text" value=${f.title} placeholder="e.g. Prevalence of anaemia among adolescent girls in Sargodha" onInput=${setV("title")} enterKeyHint="next"/>`)}
+${F("disc","Discipline",{req:1},p=>h`<select ...${p} value=${f.disc} onChange=${setV("disc")}>${DISC.map(d=>h`<option key=${d}>${d}</option>`)}</select>`)}
+<fieldset class="af-fs"><legend>Category <span class="af-req" aria-hidden="true">*</span><span class="sr"> (required)</span></legend>
+<div class="af-radios">${[["Oral","Presentation"],["Poster","Printed display"]].map(([v,d])=>h`<label class=${"af-rad"+(f.cat===v?" on":"")} key=${v}><input type="radio" name="cat" value=${v} checked=${f.cat===v} onChange=${setV("cat")}/><span><b>${v}</b><small>${d}</small></span></label>`)}</div>
+<p class="af-hint">Oral = presentation, Poster = printed display.</p></fieldset></div>`;
+if(step===2)content=h`<div>${stepHead(2,"Authors","List everyone who contributed, in order. Choose one presenting author.")}
+${au.map((x,i)=>h`<fieldset class=${"af-au"+(pres===i?" pres":"")} key=${i}><legend>${(ORD[i]||"Author "+(i+1))+" author"}</legend>
+${i>0&&h`<button type="button" class="af-rm" onClick=${()=>rmAu(i)} aria-label=${"Remove "+(ORD[i]||"author "+(i+1))+" author"}>Remove</button>`}
+${F("n"+i,"Name",{req:1},p=>h`<input ...${p} type="text" value=${x.n} placeholder="e.g. Ayesha Khan" autoComplete=${i===0?"name":"off"} onInput=${setA(i,"n")}/>`)}
+${F("e"+i,"Email",{req:i===0,hint:i>0?"Optional for co-authors.":""},p=>h`<input ...${p} type="email" inputMode="email" value=${x.e} placeholder="name@example.com" autoComplete=${i===0?"email":"off"} autoCapitalize="none" onInput=${setA(i,"e")}/>`)}
+${F("a"+i,"Affiliation",{req:1},p=>h`<input ...${p} type="text" value=${x.a} placeholder="e.g. Sargodha Medical College" autoComplete=${i===0?"organization":"off"} onInput=${setA(i,"a")}/>`)}
+<label class=${"af-pick"+(pres===i?" on":"")}><input type="radio" name="presenter" checked=${pres===i} onChange=${()=>setPres(i)}/><span>Presenting author</span></label></fieldset>`)}
+${au.length<MAXA?h`<button type="button" class="btn o block af-add" onClick=${addAu}>+ Add another author</button>`:h`<p class="af-hint">You’ve reached the maximum of ${MAXA} authors.</p>`}</div>`;
+if(step===3)content=h`<div>${stepHead(3,"Abstract","Maximum "+LIM_WORDS+" words in total across all four sections.")}
+<div class=${"af-meter "+lvl(total,LIM_WORDS)} aria-live="polite"><div class="af-meter-bar"><i style=${"width:"+Math.min(100,total/LIM_WORDS*100)+"%"}></i></div><span>${total} / ${LIM_WORDS} words</span></div>
+${touched.total&&E.total&&h`<p class="af-err" role="alert"><${Ic} n="alert" size=${15}/><span>${E.total}</span></p>`}
+${SECT.map(k=>F(k,k,{req:1,hint:{Introduction:"Background, rationale and objectives.",Methodology:"Study design, sample, tools and data analysis.",Results:"Key findings, including a numeric or statistical summary.",Conclusion:"Conclusions and recommendations."}[k],cnt:wordCnt(k)},p=>h`<textarea ...${p} class="af-ta" rows="4" value=${f[k]} onInput=${setTa(k)}/>`))}
+${F("file","Supplementary file (optional)",{hint:"PDF, DOCX or image, up to 5 MB. Attachments are not kept in drafts."},p=>h`<input ...${p} type="file" accept=".pdf,.docx,image/*" onChange=${pickFile}/>`)}</div>`;
+if(step===4)content=h`<div>${stepHead(4,"Review & submit","Check everything below. You can edit any section.")}
+<section class="af-rv"><div class="af-rv-h"><h3>Details</h3>${edit(1)}</div><dl class="af-sum"><div><dt>Title</dt><dd>${f.title}</dd></div><div><dt>Discipline</dt><dd>${f.disc}</dd></div><div><dt>Category</dt><dd>${f.cat}</dd></div></dl></section>
+<section class="af-rv"><div class="af-rv-h"><h3>Authors</h3>${edit(2)}</div><ol class="af-rv-au">${au.map((x,i)=>h`<li key=${i}><b>${x.n}</b>${pres===i&&h`<span class="af-tag">Presenting</span>`}<span>${x.e||"No email"}</span><span>${x.a}</span></li>`)}</ol></section>
+<section class="af-rv"><div class="af-rv-h"><h3>Abstract <small class=${lvl(total,LIM_WORDS)}>${total} / ${LIM_WORDS} words</small></h3>${edit(3)}</div><dl class="af-sum">${SECT.map(k=>h`<div key=${k}><dt>${k} <small>(${wc(f[k])} words)</small></dt><dd class="af-pre">${f[k]}</dd></div>`)}<div><dt>Attachment</dt><dd>${file?file.name:"None"}</dd></div></dl></section></div>`;
+
+body=h`<div class="af af-wrap" ref=${topRef}>
+${banner}
+<div class="af-top"><h1 class="af-title">Abstract submission</h1><p class=${"af-saved "+saved} role="status" aria-live="polite">${savedTxt&&h`<${Ic} n=${saved==="error"?"alert":"check"} size=${14}/>`}${savedTxt}</p></div>
+<ol class="af-steps" aria-label="Progress">${STEP_NAMES.map((n,i)=>h`<li key=${n} class=${(i+1===step?"cur ":"")+(i+1<step?"done":"")} aria-current=${i+1===step?"step":undefined}><button type="button" disabled=${i+1>step} onClick=${()=>goStep(i+1)}><span class="af-dot">${i+1<step?h`<${Ic} n="check" size=${14}/>`:i+1}</span><span class="af-sn">${n}</span></button></li>`)}</ol>
+<div class="af-bar" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow=${step} aria-label=${"Step "+step+" of 4: "+STEP_NAMES[step-1]}><i style=${"width:"+(step/4*100)+"%"}></i></div>
+${restored&&h`<div class="af-note" role="status"><span>We restored your saved draft.</span><button type="button" onClick=${()=>setRestored(false)} aria-label="Dismiss">Dismiss</button></div>`}
+<div class="af-card">${content}${err&&h`<div class="err" role="alert" style="margin-top:14px">${err}</div>`}</div>
+<div class="af-actions"><div class="af-actions-in">
+${step>1&&h`<button type="button" class="btn o af-b-back" onClick=${()=>goStep(step-1)} disabled=${busy}>Back</button>`}
+<button type="button" class="btn o af-b-save" onClick=${saveNow} disabled=${busy}>Save draft</button>
+${step<4?h`<button type="button" class="btn af-b-next" onClick=${next}>Next</button>`:h`<button type="button" class="btn af-b-next" onClick=${submit} disabled=${busy} aria-busy=${busy}>${busy?h`<span class="af-spin" aria-hidden="true"></span>Submitting…`:"Submit abstract"}</button>`}
+</div></div></div>`}
 
 return h`<div>
 <section class="sec w ab">
