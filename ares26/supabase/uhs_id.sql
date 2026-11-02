@@ -16,3 +16,9 @@ begin
     nullif(new.raw_user_meta_data->>'agreed_at','')::timestamptz);
   return new;
 end $$;
+
+-- Backfill: copies IDs that people entered before this SQL was run (they are kept in the sign-up data)
+update public.profiles p
+set uhs_id = nullif(btrim(u.raw_user_meta_data->>'uhs_id'),'')
+from auth.users u
+where u.id = p.id and p.uhs_id is null and coalesce(u.raw_user_meta_data->>'uhs_id','') <> '';

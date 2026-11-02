@@ -65,14 +65,19 @@ return h`<li key=${i}><span class="ab-num" aria-hidden="true">${i+1}</span><div 
 </div>`};
 
 export default function Abstracts(P){
-const{session,profile,go,refresh,ct}=P;const[f,setF]=useState({disc:DISC[0],cat:"Oral"}),[file,setFile]=useState(null),[err,setErr]=useState(""),[busy,setBusy]=useState(false),[done,setDone]=useState(false);
+const{session,profile,go,refresh,ct}=P;const[f,setF]=useState({disc:DISC[0],cat:"Oral"}),[file,setFile]=useState(null),[err,setErr]=useState(""),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[au,setAu]=useState([{n:"",e:"",a:""}]);
+const ORD=["First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth"],MAXA=10;
+const setA=(i,k)=>e=>setAu(au.map((x,j)=>j===i?{...x,[k]:e.target.value}:x));
 const set=k=>e=>setF({...f,[k]:e.target.value});
 const sub=async()=>{
  if(!(f.title||"").trim()||SECT.some(s=>!(f[s]||"").trim()))return setErr("Add a title and complete every section.");
+ const A=au.map(x=>({name:x.n.trim(),email:x.e.trim(),affiliation:x.a.trim()}));
+ if(A.some((x,i)=>!x.name||!x.email||!x.affiliation))return setErr("Complete the name, email and affiliation for every author, or remove the extra author boxes.");
+ if(A.some(x=>!/^\S+@\S+\.\S+$/.test(x.email)))return setErr("Enter a valid email address for every author.");
  if(file&&file.size>MAX_FILE)return setErr("File is larger than 5 MB.");
  setErr("");setBusy(true);
  try{const path=file?await upload("abstract-files",session.user.id,file):null;
-  const{error}=await sb.from("abstracts").insert({user_id:session.user.id,title:f.title.trim(),discipline:f.disc,category:f.cat,body:Object.fromEntries(SECT.map(s=>[s,f[s].trim()])),file_path:path,status:"Submitted"});
+  const{error}=await sb.from("abstracts").insert({user_id:session.user.id,title:f.title.trim(),discipline:f.disc,category:f.cat,body:{...Object.fromEntries(SECT.map(s=>[s,f[s].trim()])),authors:A},file_path:path,status:"Submitted"});
   if(error)throw error;await refresh();setDone(true)}
  catch(e){setErr(e.message||"Submission failed. Try again.")}
  setBusy(false)};
@@ -84,6 +89,11 @@ else if(done)body=h`<div class="auth"><h2>Abstract submitted</h2><p class="sub">
 else{const dl=(ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[])[0]||"TBC";
 body=h`<div class="auth" style="max-width:640px"><h2>Abstract submission</h2><p class="sub">Closes ${dl}.</p><div class="panel">
 <label>Title<input value=${f.title||""} onInput=${set("title")}/></label>
+<div class="au-box"><h3 class="au-h">Authors’ details</h3>${au.map((x,i)=>h`<div class="au-card" key=${i}><div class="au-top"><b>${(ORD[i]||"Author "+(i+1))+" Author"}</b>${i>0&&h`<button type="button" class="btn o s dng" onClick=${()=>setAu(au.filter((_,j)=>j!==i))}>Remove</button>`}</div>
+<label>Name<input value=${x.n} autoComplete="off" onInput=${setA(i,"n")}/></label>
+<label>Email<input type="email" value=${x.e} autoComplete="off" onInput=${setA(i,"e")}/></label>
+<label>Affiliation<input value=${x.a} autoComplete="off" onInput=${setA(i,"a")}/></label></div>`)}
+${au.length<MAXA&&h`<button type="button" class="btn o au-add" onClick=${()=>setAu([...au,{n:"",e:"",a:""}])}>+ Add another author</button>`}</div>
 <label>Discipline<select value=${f.disc} onChange=${set("disc")}>${DISC.map(d=>h`<option key=${d}>${d}</option>`)}</select></label>
 <label>Category<select value=${f.cat} onChange=${set("cat")}><option>Oral</option><option>Poster</option></select></label>
 ${SECT.map(s=>h`<label key=${s}>${s}<textarea rows="4" value=${f[s]||""} onInput=${set(s)}/></label>`)}

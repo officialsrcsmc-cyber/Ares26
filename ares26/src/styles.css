@@ -496,3 +496,10 @@ body::before{z-index:101}
 .ft-credit a{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#cdbbe3;font-weight:500;text-decoration:none;letter-spacing:.01em;transition:background .2s,transform .2s}
 .ft-credit a b{color:#fff;font-weight:700;font-size:1.08rem;font-family:var(--serif)}
 .ft-credit a:hover{background:rgba(255,255,255,.22);transform:translateY(-1px);text-decoration:none}
+
+/* ---------- Abstract authors box ---------- */
+.au-box{margin:6px 0 14px;padding:16px;border:1px solid var(--bd);border-radius:18px;background:#faf8fd}
+.au-h{margin:0 0 12px;font:700 1.05rem "Playfair Display";color:var(--pd)}
+.au-card{padding:14px;margin-bottom:12px;background:#fff;border:1px solid var(--bd);border-radius:14px}
+.au-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--p)}
+.au-add{width:100%}
