@@ -170,7 +170,7 @@ const stepHead=(n,t,sub)=>h`<div class="af-sh"><h2 data-stephead tabIndex="-1">$
 const edit=n=>h`<button type="button" class="af-edit" onClick=${()=>goStep(n)}>Edit</button>`;
 let content;
 if(step===1)content=h`<div>${stepHead(1,"Abstract details","Tell us what your work is about.")}
-${F("title","Title",{req:1,hint:"Concise and reflective of your research.",cnt:h`<p class=${"af-cnt "+lvl(f.title.length,LIM_TITLE)} id="af-c-title"><span></span><span>${f.title.length} / ${LIM_TITLE} characters</span></p>`},p=>h`<input ...${p} type="text" value=${f.title} placeholder="e.g. Prevalence of anaemia among adolescent girls in Sargodha" onInput=${setV("title")} enterKeyHint="next"/>`)}
+${F("title","Title",{req:1,hint:"Concise and reflective of your research.",cnt:h`<p class=${"af-cnt "+lvl(f.title.length,LIM_TITLE)} id="af-c-title"><span></span><span>${f.title.length} / ${LIM_TITLE} characters</span></p>`},p=>h`<input ...${p} type="text" value=${f.title} placeholder="XYZ" onInput=${setV("title")} enterKeyHint="next"/>`)}
 ${F("disc","Discipline",{req:1},p=>h`<select ...${p} value=${f.disc} onChange=${setV("disc")}>${DISC.map(d=>h`<option key=${d}>${d}</option>`)}</select>`)}
 <fieldset class="af-fs"><legend>Category <span class="af-req" aria-hidden="true">*</span><span class="sr"> (required)</span></legend>
 <div class="af-radios">${[["Oral","Presentation"],["Poster","Printed display"]].map(([v,d])=>h`<label class=${"af-rad"+(f.cat===v?" on":"")} key=${v}><input type="radio" name="cat" value=${v} checked=${f.cat===v} onChange=${setV("cat")}/><span><b>${v}</b><small>${d}</small></span></label>`)}</div>
@@ -178,15 +178,15 @@ ${F("disc","Discipline",{req:1},p=>h`<select ...${p} value=${f.disc} onChange=${
 if(step===2)content=h`<div>${stepHead(2,"Authors","List everyone who contributed, in order. Choose one presenting author.")}
 ${au.map((x,i)=>h`<fieldset class=${"af-au"+(pres===i?" pres":"")} key=${i}><legend>${(ORD[i]||"Author "+(i+1))+" author"}</legend>
 ${i>0&&h`<button type="button" class="af-rm" onClick=${()=>rmAu(i)} aria-label=${"Remove "+(ORD[i]||"author "+(i+1))+" author"}>Remove</button>`}
-${F("n"+i,"Name",{req:1},p=>h`<input ...${p} type="text" value=${x.n} placeholder="e.g. Ayesha Khan" autoComplete=${i===0?"name":"off"} onInput=${setA(i,"n")}/>`)}
-${F("e"+i,"Email",{req:i===0,hint:i>0?"Optional for co-authors.":""},p=>h`<input ...${p} type="email" inputMode="email" value=${x.e} placeholder="name@example.com" autoComplete=${i===0?"email":"off"} autoCapitalize="none" onInput=${setA(i,"e")}/>`)}
-${F("a"+i,"Affiliation",{req:1},p=>h`<input ...${p} type="text" value=${x.a} placeholder="e.g. Sargodha Medical College" autoComplete=${i===0?"organization":"off"} onInput=${setA(i,"a")}/>`)}
+${F("n"+i,"Name",{req:1},p=>h`<input ...${p} type="text" value=${x.n} placeholder="XYZ" autoComplete=${i===0?"name":"off"} onInput=${setA(i,"n")}/>`)}
+${F("e"+i,"Email",{req:i===0,hint:i>0?"Optional for co-authors.":""},p=>h`<input ...${p} type="email" inputMode="email" value=${x.e} placeholder="XYZ" autoComplete=${i===0?"email":"off"} autoCapitalize="none" onInput=${setA(i,"e")}/>`)}
+${F("a"+i,"Affiliation",{req:1},p=>h`<input ...${p} type="text" value=${x.a} placeholder="XYZ" autoComplete=${i===0?"organization":"off"} onInput=${setA(i,"a")}/>`)}
 <label class=${"af-pick"+(pres===i?" on":"")}><input type="radio" name="presenter" checked=${pres===i} onChange=${()=>setPres(i)}/><span>Presenting author</span></label></fieldset>`)}
 ${au.length<MAXA?h`<button type="button" class="btn o block af-add" onClick=${addAu}>+ Add another author</button>`:h`<p class="af-hint">You’ve reached the maximum of ${MAXA} authors.</p>`}</div>`;
 if(step===3)content=h`<div>${stepHead(3,"Abstract","Maximum "+LIM_WORDS+" words in total across all four sections.")}
 <div class=${"af-meter "+lvl(total,LIM_WORDS)} aria-live="polite"><div class="af-meter-bar"><i style=${"width:"+Math.min(100,total/LIM_WORDS*100)+"%"}></i></div><span>${total} / ${LIM_WORDS} words</span></div>
 ${touched.total&&E.total&&h`<p class="af-err" role="alert"><${Ic} n="alert" size=${15}/><span>${E.total}</span></p>`}
-${SECT.map(k=>F(k,k,{req:1,hint:{Introduction:"Background, rationale and objectives.",Methodology:"Study design, sample, tools and data analysis.",Results:"Key findings, including a numeric or statistical summary.",Conclusion:"Conclusions and recommendations."}[k],cnt:wordCnt(k)},p=>h`<textarea ...${p} class="af-ta" rows="4" value=${f[k]} onInput=${setTa(k)}/>`))}
+${SECT.map(k=>F(k,k,{req:1,hint:{Introduction:"Background, rationale and objectives.",Methodology:"Study design, sample, tools and data analysis.",Results:"Key findings, including a numeric or statistical summary.",Conclusion:"Conclusions and recommendations."}[k],cnt:wordCnt(k)},p=>h`<textarea ...${p} class="af-ta" rows="4" placeholder="XYZ" value=${f[k]} onInput=${setTa(k)}/>`))}
 ${F("file","Supplementary file (optional)",{hint:"PDF, DOCX or image, up to 5 MB. Attachments are not kept in drafts."},p=>h`<input ...${p} type="file" accept=".pdf,.docx,image/*" onChange=${pickFile}/>`)}</div>`;
 if(step===4)content=h`<div>${stepHead(4,"Review & submit","Check everything below. You can edit any section.")}
 <section class="af-rv"><div class="af-rv-h"><h3>Details</h3>${edit(1)}</div><dl class="af-sum"><div><dt>Title</dt><dd>${f.title}</dd></div><div><dt>Discipline</dt><dd>${f.disc}</dd></div><div><dt>Category</dt><dd>${f.cat}</dd></div></dl></section>
