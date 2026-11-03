@@ -1,4 +1,4 @@
-import {AMB,ambFind,useState,useEffect,h,BANK,DISC,SECT,left} from '../shared.js';
+import {AMB,ambFind,waNum,waPretty,useState,useEffect,h,BANK,DISC,SECT,left} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 const clean=c=>{let v=String(c??"");if(/^[=@\t\r]/.test(v)||/^[+-](?![0-9])/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'};
@@ -42,10 +42,14 @@ const Sel=(v,fn,o)=>h`<select value=${v} onChange=${e=>fn(e.target.value)} style
 const day=d=>d?new Date(d).toLocaleString():"";
 const cnt=(arr,s)=>arr.filter(x=>x.status===s).length;
 const absShown=abss.filter(a=>sf==="All"||a.status===sf);
-const shown=regs.filter(r=>(sf==="All"||r.status===sf)&&(!q||(r.first_name+" "+r.last_name+" "+r.email+" "+(r.tx_id||"")+" "+(r.uhs_id||"")).toLowerCase().includes(q.toLowerCase())));
+const shown=regs.filter(r=>(sf==="All"||r.status===sf)&&(!q||(r.first_name+" "+r.last_name+" "+r.email+" "+(r.tx_id||"")+" "+(r.uhs_id||"")+" "+(r.phone||"")).toLowerCase().includes(q.toLowerCase())));
 
-const exportRegs=()=>download("ares26-registrations.csv",[["Registered at","First name","Last name","Email","SMC student","Phone","Institution","Programme","Degree year","Transaction date","Account name","Amount (PKR)","Transaction ID","UHS/SMC ID","Ambassador code","Code valid","Proof uploaded","Status"],
- ...regs.map(r=>[r.created_at,r.first_name,r.last_name,r.email,r.smc?"Yes":"No",r.phone,r.institution,r.programme,r.degree_year,r.tx_date,r.account_name,r.amount,r.tx_id,r.uhs_id||"",r.ambassador_code,r.ambassador_code?(ambFind(r.ambassador_code)?"Yes":"No"):"",r.proof_path?"Yes":"No",r.status])]);
+const exportRegs=()=>download("ares26-registrations.csv",[["Registered at","First name","Last name","Email","SMC student","WhatsApp number","Institution","Programme","Degree year","Transaction date","Account name","Amount (PKR)","Transaction ID","UHS/SMC ID","Ambassador code","Code valid","Proof uploaded","Status"],
+ ...regs.map(r=>[r.created_at,r.first_name,r.last_name,r.email,r.smc?"Yes":"No",waPretty(r.phone)||r.phone,r.institution,r.programme,r.degree_year,r.tx_date,r.account_name,r.amount,r.tx_id,r.uhs_id||"",r.ambassador_code,r.ambassador_code?(ambFind(r.ambassador_code)?"Yes":"No"):"",r.proof_path?"Yes":"No",r.status])]);
+const waList=regs.filter(r=>waNum(r.phone));
+const exportWa=()=>download("ares26-whatsapp-list.csv",[["Name","WhatsApp number","WhatsApp number (digits only)"],...waList.map(r=>[((r.first_name||"")+" "+(r.last_name||"")).trim(),waPretty(r.phone),waNum(r.phone)])]);
+const exportVcf=()=>{const v=waList.map(r=>{const n=((r.first_name||"")+" "+(r.last_name||"")).trim();return"BEGIN:VCARD\r\nVERSION:3.0\r\nFN:ARES26 "+n.replace(/[,;\r\n]/g," ")+"\r\nTEL;TYPE=CELL:+"+waNum(r.phone)+"\r\nEND:VCARD"}).join("\r\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([v],{type:"text/vcard;charset=utf-8"}));a.download="ares26-whatsapp-contacts.vcf";document.body.appendChild(a);a.click();a.remove()};
 const exportAbs=()=>download("ares26-abstracts.csv",[["Submitted at","Author","Email","Title","Discipline","Category","Introduction","Methodology","Results","Conclusion","Authors","File uploaded","Status"],
  ...abss.map(a=>[a.created_at,a.profiles?a.profiles.first_name+" "+a.profiles.last_name:"",a.profiles?a.profiles.email:"",a.title,a.discipline,a.category,...SECT.map(s=>a.body[s]),(a.body.authors||[]).map(x=>x.name+(x.presenting?" [PRESENTING]":"")+(x.email?" <"+x.email+">":"")+" ("+x.affiliation+")").join("; "),a.file_path?"Yes":"No",a.status])]);
 
@@ -55,7 +59,8 @@ ${msg&&h`<div class="ok">${msg}</div>`}
 <div class="g c5" style="margin-bottom:16px">${[["Registrations",regs.length],["Pending",cnt(regs,"Pending")],["Approved",cnt(regs,"Approved")],["Abstracts",abss.length],["Awaiting review",cnt(abss,"Submitted")+cnt(abss,"Under Review")],["Accepted",cnt(abss,"Accepted")]].map(([l,n])=>h`<div class="card" key=${l} style="padding:12px"><b style="font-size:1.4rem">${n}</b><div class="mut" style="font-size:.8rem">${l}</div></div>`)}</div>
 ${(tab=="reg"||tab=="abs")&&h`<label style="max-width:240px">Filter by status<select value=${sf} onChange=${e=>setSf(e.target.value)}>${["All"].concat(tab=="reg"?["Pending","Approved","Rejected"]:["Submitted","Under Review","Accepted","Rejected"]).map(x=>h`<option key=${x}>${x}</option>`)}</select></label>`}
 ${tab=="reg"&&h`<div><input placeholder="Search name, email, UHS/SMC ID or transaction ID" value=${q} onInput=${e=>setQ(e.target.value)} style="margin-bottom:12px"/>
-<div class="ov"><table><tr><th>Name</th><th>UHS / SMC ID</th><th>Payment</th><th>Status</th><th>Manage</th></tr>${shown.map(u=>h`<tr key=${u.id}><td>${u.first_name} ${u.last_name}<br/><span class="mut">${u.email}</span><br/><span class="mut">${u.institution} · ${u.programme}</span></td>
+<div class="ov"><table><tr><th>Name</th><th>WhatsApp</th><th>UHS / SMC ID</th><th>Payment</th><th>Status</th><th>Manage</th></tr>${shown.map(u=>h`<tr key=${u.id}><td>${u.first_name} ${u.last_name}<br/><span class="mut">${u.email}</span><br/><span class="mut">${u.institution} · ${u.programme}</span></td>
+<td>${u.phone?h`<b>${waPretty(u.phone)||u.phone}</b><br/><a href=${"https://wa.me/"+waNum(u.phone)} target="_blank" rel="noopener noreferrer">Open chat</a>`:h`<span class="mut">Not provided</span>`}</td>
 <td>${u.uhs_id?h`<b>${u.uhs_id}</b>`:h`<span class="mut">${u.smc?"Not provided":"Non-SMC"}</span>`}</td>
 <td>${u.proof_path?h`<span>PKR ${u.amount}<br/>ID ${u.tx_id}<br/>${u.account_name}<br/><span class="mut">${day(u.tx_date)}</span><br/>${u.ambassador_code&&h`<span>Code: <b>${u.ambassador_code}</b> ${ambFind(u.ambassador_code)?h`<span class="amb-tick" title="Matches an ambassador code">✓</span> <span class="mut">${ambFind(u.ambassador_code)[1]}</span>`:h`<span class="amb-x" title="No matching code">✕</span>`}</span><br/>`}${links["p"+u.id]?h`<a href=${links["p"+u.id]} target="_blank" rel="noopener">Open proof</a>`:h`<a onClick=${()=>open("p"+u.id,"payment-proofs",u.proof_path)}>View proof</a>`}</span>`:h`<span class="mut">No payment yet</span>`}</td>
 <td>${Sel(u.status,v=>setStatus("profiles",u.id,v),["Pending","Approved","Rejected"])}</td>
@@ -72,4 +77,4 @@ ${tab=="ct"&&h`<div><h3>Key dates</h3>${draft.dates.map((d,i)=>h`<div key=${i} c
 <h3>Team</h3>${draft.team.map((d,i)=>h`<div key=${i} class="g c2" style="margin-bottom:8px"><input value=${d[0]} onInput=${e=>ed("team",i,0,e.target.value)}/><input value=${d[1]} onInput=${e=>ed("team",i,1,e.target.value)}/></div>`)}
 <h3>FAQs</h3>${draft.faqs.map((d,i)=>h`<div key=${i} class="g c2" style="margin-bottom:8px"><input value=${d[0]} onInput=${e=>ed("faqs",i,0,e.target.value)}/><input value=${d[1]} onInput=${e=>ed("faqs",i,1,e.target.value)}/></div>`)}
 <button class="btn" onClick=${saveContent}>Save changes</button></div>`}
-${tab=="csv"&&h`<div><p class="mut">Downloads open directly in Excel or Google Sheets.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onClick=${exportRegs}>Download registrations CSV (${regs.length})</button><button class="btn o" onClick=${exportAbs}>Download abstracts CSV (${abss.length})</button></div></div>`}</div>`}
+${tab=="csv"&&h`<div><p class="mut">Downloads open directly in Excel or Google Sheets. The WhatsApp list has each participant’s name and number; the .vcf file imports the same list straight into your phone’s contacts.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onClick=${exportRegs}>Download registrations CSV (${regs.length})</button><button class="btn o" onClick=${exportAbs}>Download abstracts CSV (${abss.length})</button><button class="btn" onClick=${exportWa}>Download WhatsApp list (${waList.length})</button><button class="btn o" onClick=${exportVcf}>Download contacts .vcf (${waList.length})</button></div></div>`}</div>`}

@@ -41,6 +41,9 @@ export const Faq=({ct})=>h`<div class="ab-accs">${ct.faqs.map(([q,a],i)=>h`<${Ac
 
 
 export const num=v=>{v=String(v).replace(/[^\d.]/g,"");const i=v.indexOf(".");return i<0?v:v.slice(0,i+1)+v.slice(i+1).replace(/\./g,"")};
+// Normalises a phone number to international digits (Pakistan default): 0300... or 300... -> 92300..., +92 / 0092 kept.
+export const waNum=raw=>{const r=String(raw||"").trim();let d=r.replace(/\D/g,"");if(!d)return"";if(r.startsWith("+"))return d;if(d.startsWith("00"))return d.slice(2);if(d.startsWith("0"))return"92"+d.slice(1);if(d.startsWith("92")&&d.length>=12)return d;if(d.length===10&&d[0]==="3")return"92"+d;return d};
+export const waPretty=raw=>{const d=waNum(raw);if(!d)return"";return d.startsWith("92")&&d.length===12?"+92 "+d.slice(2,5)+" "+d.slice(5):"+"+d};
 export const phoneClean=v=>String(v).replace(/[^\d+\-\s()]/g,"");
 
 
