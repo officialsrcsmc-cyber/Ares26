@@ -49,3 +49,4 @@ Uses Resend (resend.com). Install the Supabase CLI, then:
 - Free-tier projects pause after a week of no activity. Open the dashboard occasionally, or upgrade before the event.
 - **Ambassador codes:** the codes are hard-coded in `src/shared.js` (the `AMB` list). Run `supabase/ambassador.sql` once in the SQL Editor so the entered code can be saved with the payment.
 - **UHS / SMC ID:** run `supabase/uhs_id.sql` once in the SQL Editor so the ID entered by SMC students is saved.
+- **Workshop enrolment:** run `supabase/workshops.sql` once in the SQL Editor (already included at the bottom of `schema.sql` for new installs). Only people with an **Approved** registration can request a workshop seat. Requests appear in **Admin > Workshop approvals**; approving one issues the ticket card on the participant's dashboard. Add each workshop's date, time and venue in **Admin > Content > Workshops** (then Save changes).

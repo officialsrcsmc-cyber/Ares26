@@ -172,3 +172,40 @@ update public.profiles p
 set uhs_id = nullif(btrim(u.raw_user_meta_data->>'uhs_id'),'')
 from auth.users u
 where u.id = p.id and p.uhs_id is null and coalesce(u.raw_user_meta_data->>'uhs_id','') <> '';
+
+-- ============ WORKSHOP ENROLMENTS (same as supabase/workshops.sql) ============
+
+create table if not exists public.workshop_enrollments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  workshop_id text not null check (char_length(workshop_id) between 1 and 60),
+  workshop_title text not null default '' check (char_length(workshop_title) <= 200),
+  status text not null default 'Pending' check (status in ('Pending','Approved','Rejected')),
+  created_at timestamptz not null default now(),
+  unique (user_id, workshop_id)
+);
+
+-- true only when the signed-in person has a profile (signed up) AND an Approved registration
+create or replace function public.is_approved() returns boolean
+language sql security definer set search_path = public stable as $$
+  select coalesce((select status = 'Approved' from public.profiles where id = auth.uid()), false)
+$$;
+
+alter table public.workshop_enrollments enable row level security;
+
+drop policy if exists "wk read own or admin" on public.workshop_enrollments;
+create policy "wk read own or admin" on public.workshop_enrollments for select to authenticated
+  using (user_id = auth.uid() or public.is_admin());
+
+drop policy if exists "wk insert approved own" on public.workshop_enrollments;
+create policy "wk insert approved own" on public.workshop_enrollments for insert to authenticated
+  with check (user_id = auth.uid() and status = 'Pending' and public.is_approved());
+
+drop policy if exists "wk update admin" on public.workshop_enrollments;
+create policy "wk update admin" on public.workshop_enrollments for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+
+-- a person may cancel their own request while it is still Pending; admins may delete any
+drop policy if exists "wk delete own pending or admin" on public.workshop_enrollments;
+create policy "wk delete own pending or admin" on public.workshop_enrollments for delete to authenticated
+  using ((user_id = auth.uid() and status = 'Pending') or public.is_admin());

@@ -34,7 +34,16 @@ export const DISC=["Medicine & Allied","Surgery & Allied","Pediatrics","Obstetri
 export const SECT=["Introduction","Methodology","Results","Conclusion"];
 export const DEF={dates:[["Oct 31","Registration opens","2026-10-31"],["Oct 31","Abstract submission opens","2026-10-31"],["Nov 9","Registration closes","2026-11-09"],["Nov 9","Abstract submission deadline","2026-11-09"],["Nov 14","Notification of acceptance","2026-11-14"],["Nov 19","Final PowerPoint / poster due","2026-11-19"],["Nov 21","ARES’26 main event","2026-11-21"]],
 team:Array.from({length:10},(_,i)=>["Team Member "+(i+1),"Role / Title"]),
-faqs:[["Who can attend?","Medical and allied health students, faculty and researchers. SMC students and external participants may register."],["Is it in person?","Yes. ARES’26 takes place on campus at Sargodha Medical College."],["How do I pay?","Pay by bank transfer, then upload your proof in step 3 of registration. Your status shows as Pending until the team verifies it."],["What can I submit?","Original research, case reports and reviews, as an oral or poster abstract. Use the structured format on the Abstracts page."],["Will there be workshops?","Yes. Details and enrolment will be posted on the Workshop page."]]};
+faqs:[["Who can attend?","Medical and allied health students, faculty and researchers. SMC students and external participants may register."],["Is it in person?","Yes. ARES’26 takes place on campus at Sargodha Medical College."],["How do I pay?","Pay by bank transfer, then upload your proof in step 3 of registration. Your status shows as Pending until the team verifies it."],["What can I submit?","Original research, case reports and reviews, as an oral or poster abstract. Use the structured format on the Abstracts page."],["Will there be workshops?","Yes. Details and enrolment will be posted on the Workshop page."]],
+workshops:[]};
+// Blank template for a new workshop row in the admin Content editor.
+export const BLANK_WORKSHOP={title:"",desc:"",image:"",feeSmc:"",feeNon:"",date:"",time:"",venue:""};
+// Every workshop needs a stable id so enrolments can point at it. New ones get a random id; older ones saved before ids existed get w1, w2... by position.
+export const newWorkshop=()=>({...BLANK_WORKSHOP,id:"w"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)});
+export const withWkIds=l=>(Array.isArray(l)?l:[]).map((w,i)=>w&&w.id?w:{...w,id:"w"+(i+1)});
+export const wkDate=d=>{if(!d)return"";const x=new Date(d+"T00:00:00");return isNaN(x)?d:x.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})};
+// How a workshop fee should be shown on the public Workshop page: 0/blank -> Free.
+export const feeLabel=v=>{const n=Number(v);return(v===""||v==null||isNaN(n))?"":n<=0?"Free":"PKR "+n.toLocaleString("en-US")};
 export const left=iso=>{const d=Math.ceil((new Date(iso)-new Date())/864e5);return d>1?"IN "+d+" DAYS":d==1?"TOMORROW":d==0?"TODAY":"PASSED"};
 export const NAV=[["home","Home"],["register","Registration"],["abstracts","Abstracts"],["workshops","Workshop"],["faqs","FAQs"],["dashboard","Dashboard"]];
 export const Faq=({ct})=>h`<div class="ab-accs">${ct.faqs.map(([q,a],i)=>h`<${Acc} key=${q} t=${q} d=${a} i=${"faq"+i}/>`)}</div>`;

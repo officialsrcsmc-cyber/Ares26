@@ -1,4 +1,4 @@
-import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq,Ic} from './shared.js';
+import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq,Ic,withWkIds} from './shared.js';
 import {sb} from './supabase.js';
 
 import Home from './pages/Home.js';
@@ -9,6 +9,7 @@ import Abstracts from './pages/Abstracts.js';
 import Dashboard from './pages/Dashboard.js';
 import Admin from './pages/Admin.js';
 import Teams from './pages/Teams.js';
+import Workshops from './pages/Workshops.js';
 
 const Head=(e,t)=>h`<div class="ab-top"><p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>${e}</span></p><h1 class="ab-title">${t}</h1></div>`;
 const Txt=(t,b)=>()=>h`<div class="w sec ab txt">${Head("INFORMATION",t)}<div class="ab-note"><p>${b}</p></div></div>`;
@@ -18,7 +19,7 @@ const AdminGate=P=>{if(P.session===undefined||(P.session&&P.profile===undefined)
 
 const PAGES={home:Home,register:Registration,login:Login,reset:Reset,abstracts:Abstracts,teams:Teams,dashboard:Dashboard,"ares-admin":AdminGate,
 faqs:P=>h`<div class="w sec ab">${Head("FREQUENTLY ASKED","FAQs")}<${Faq} ct=${P.ct}/></div>`,
-workshops:Txt("Workshops","Coming soon. Hands-on workshop details, schedule and enrolment will be posted here."),
+workshops:Workshops,
 terms:Txt("Terms of use","Placeholder. The organizing committee will publish the full Terms of Use before registration opens."),
 conduct:Txt("Code of conduct","Placeholder. ARES’26 expects respectful, honest and inclusive conduct from every participant. Full text to follow.")};
 const validContent=c=>c&&Array.isArray(c.dates)&&Array.isArray(c.team)&&Array.isArray(c.faqs);
@@ -27,7 +28,7 @@ function Setup(){return h`<div class="w sec" style="max-width:560px"><h2>Setup n
 
 export default function App(){
 const[pg,setPg]=useState(()=>{const h=location.hash||"";if(/type=signup/.test(h))return"login";const t=h.slice(1);return PAGES[t]?t:"home"}),[menu,setMenu]=useState(false),
-[session,setSession]=useState(undefined),[profile,setProfile]=useState(undefined),[abs,setA]=useState([]),[ct,setC]=useState(DEF);
+[session,setSession]=useState(undefined),[profile,setProfile]=useState(undefined),[abs,setA]=useState([]),[ct,setC]=useState(DEF),[enr,setEnr]=useState([]);
 
 // auth session
 useEffect(()=>{if(!sb)return;
@@ -37,19 +38,20 @@ useEffect(()=>{if(!sb)return;
 
 // public site content (dates, team, FAQs) edited by admins
 useEffect(()=>{if(!sb)return;
- sb.from("site_content").select("data").eq("id",1).maybeSingle().then(({data})=>{if(data&&validContent(data.data))setC({...data.data,dates:DEF.dates})})},[]);
+ sb.from("site_content").select("data").eq("id",1).maybeSingle().then(({data})=>{if(data&&validContent(data.data))setC({...data.data,dates:DEF.dates,workshops:withWkIds(data.data.workshops)})})},[]);
 
 // the signed-in person's profile and abstracts
 const refresh=async()=>{
- if(!sb||!session){setProfile(session===undefined?undefined:null);setA([]);return}
+ if(!sb||!session){setProfile(session===undefined?undefined:null);setA([]);setEnr([]);return}
  const{data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();setProfile(p||null);
- const{data:a}=await sb.from("abstracts").select("*").eq("user_id",session.user.id).order("created_at",{ascending:false});setA(a||[])};
+ const{data:a}=await sb.from("abstracts").select("*").eq("user_id",session.user.id).order("created_at",{ascending:false});setA(a||[]);
+ const{data:w}=await sb.from("workshop_enrollments").select("*").eq("user_id",session.user.id).order("created_at",{ascending:false});setEnr(w||[])};
 useEffect(()=>{refresh()},[session&&session.user.id]);
 
 useEffect(()=>{if(!menu)return;const k=e=>{if(e.key==="Escape")setMenu(false)};window.addEventListener("keydown",k);return()=>window.removeEventListener("keydown",k)},[menu]);
 const go=p=>{setPg(p);setMenu(false);window.scrollTo(0,0);try{location.hash=p}catch(e){}};
-const logout=async()=>{await sb.auth.signOut();setProfile(null);setA([]);go("home")};
-const P={go,sb,session,profile,refresh,logout,abs,ct,setC},Page=PAGES[pg]||Home;
+const logout=async()=>{await sb.auth.signOut();setProfile(null);setA([]);setEnr([]);go("home")};
+const P={go,sb,session,profile,refresh,logout,abs,ct,setC,enr},Page=PAGES[pg]||Home;
 const nav=(k,l,mob)=>h`<a key=${k} href=${"#"+k} class=${pg==k?"on":""} aria-current=${pg==k?"page":undefined} onClick=${e=>{e.preventDefault();go(k)}}>${l}</a>`;
 const adm=profile&&profile.is_admin;
 return h`<div><header class=${pg==="abstracts"?"hd-static":""}><div class="w hd"><a href="#home" class="brand" aria-label="ARES’26 home" onClick=${e=>{e.preventDefault();go("home")}}><img src=${LOGO_LIGHT} alt="ARES’26"/></a><div class="sp"/><nav aria-label="Main">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>

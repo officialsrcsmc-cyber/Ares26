@@ -1,8 +1,8 @@
-import {useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,ambFind,DISC,SECT,left} from '../shared.js';
+import {useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,ambFind,DISC,SECT,left,wkDate} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 export default function Dashboard(P){
-const{session,profile,abs,go,logout,refresh,ct}=P;
+const{session,profile,abs,go,logout,refresh,ct,enr}=P;
 const[f,setF]=useState({}),[file,setFile]=useState(null),[err,setErr]=useState(""),[busy,setBusy]=useState(false),[cv,setCv]=useState(null),[cbusy,setCbusy]=useState(false),[cpy,setCpy]=useState("");
 if(session===undefined||(session&&profile===undefined))return h`<div class="dash"><p class="mut">Loading...</p></div>`;
 if(!session)return h`<div class="auth"><h2>Dashboard</h2><p class="sub">Log in to see your registration and abstracts.</p><div class="panel"><button class="btn block" onClick=${()=>go("login")}>Log in</button></div></div>`;
@@ -53,7 +53,19 @@ ${needPay?h`<section class="dsec"><h3>${profile.status==="Rejected"?"Payment rej
 <label>Payment proof (image or PDF, max 5 MB)<input type="file" accept="image/*,.pdf" onChange=${e=>setFile(e.target.files[0]||null)}/></label>
 ${err&&h`<div class="err" role="alert">${err}</div>`}<button class="btn block" disabled=${busy} onClick=${pay}>${busy?"Uploading...":"Submit payment"}</button></div></section>`
 :h`<section class="dsec"><h3>Payment</h3><div class="item"><dl class="kv"><dt>Amount</dt><dd>PKR ${profile.amount}</dd><dt>Transaction ID</dt><dd>${profile.tx_id}</dd><dt>Status</dt><dd><span class=${"badge "+profile.status}>${profile.status}</span></dd></dl>${profile.status==="Pending"?h`<p class="mut" style="margin:10px 0 0;font-size:.9rem">Proof received. The team is verifying it.</p>`:""}</div></section>`}
-<section class="dsec"><h3>My workshops</h3><p class="empty">No workshops yet. Enrolment opens when the schedule is announced.</p></section>
+<section class="dsec"><h3>My workshops</h3>${(enr||[]).length?(enr||[]).map(e=>{
+ const w=(ct.workshops||[]).find(x=>x.id===e.workshop_id)||{},ok=e.status==="Approved",no=e.status==="Rejected",
+ tno=String(e.id).replace(/-/g,"").slice(0,8).toUpperCase(),
+ date=wkDate(w.date)||"To be announced",time=w.time||"To be announced",venue=w.venue||"Sargodha Medical College";
+ return h`<article class=${"tkt "+e.status} key=${e.id} aria-label=${"Workshop ticket: "+(w.title||e.workshop_title)}>
+<div class="tkt-main"><p class="tkt-eye"><span>ARES’26</span><i aria-hidden="true"></i><span>Workshop ticket</span></p>
+<h4 class="tkt-title">${w.title||e.workshop_title||"Workshop"}</h4>
+<dl class="tkt-meta"><div><dt>Date</dt><dd>${date}</dd></div><div><dt>Time</dt><dd>${time}</dd></div><div class="wide"><dt>Venue</dt><dd>${venue}</dd></div></dl>
+<p class="tkt-who"><span>Delegate</span>${profile.first_name} ${profile.last_name}</p></div>
+<div class="tkt-stub"><span class=${"tkt-chip "+e.status}>${ok?"Confirmed":no?"Not approved":"Awaiting approval"}</span>
+<div><p class="tkt-lbl">Ticket no.</p><p class="tkt-no">${tno}</p></div>
+${ok?h`<span class="tkt-bars" aria-hidden="true"></span><p class="tkt-note">Admit one. Show at the workshop desk.</p>`:h`<p class="tkt-note">${no?"Contact the organizing team if you think this is a mistake.":"The team will confirm your seat soon."}</p>`}</div></article>`}):h`<p class="empty">${profile.status==="Approved"?"You have not enrolled in a workshop yet. Pick one to request your ticket.":"Workshop enrolment opens once your registration is approved."}</p>`}
+<button class="btn o" onClick=${()=>go("workshops")}>${(enr||[]).length?"Browse workshops":"See workshops"}</button></section>
 <section class="dsec"><h3>Abstract acceptance status</h3>${abs.length?abs.map(a=>{const st=a.status,steps=["Submitted","Under Review",st==="Rejected"?"Rejected":"Accepted"],at=steps.indexOf(st),
  msg=st==="Accepted"?"Congratulations! Your abstract has been accepted for "+a.category.toLowerCase()+" presentation. Further instructions will be shared with you.":st==="Rejected"?"Unfortunately your abstract was not accepted this time. Thank you for submitting, and we hope to see you at ARES’26.":st==="Under Review"?"Your abstract is being reviewed by the scientific committee.":"We received your abstract. It will be reviewed soon.";
  return h`<div class=${"item astat "+st.replace(/ /g,"")} key=${a.id}><b>${a.title}</b><div class="meta">${a.discipline}, ${a.category}</div>
