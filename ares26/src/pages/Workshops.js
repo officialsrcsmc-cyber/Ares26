@@ -1,4 +1,4 @@
-import {useState,h,Ic,feeLabel,wkDate,ACCTS} from '../shared.js';
+import {useState,useEffect,h,Ic,feeLabel,wkDate,ACCTS} from '../shared.js';
 import {upload,MAX_FILE} from '../supabase.js';
 
 const Head=(e,t)=>h`<div class="ab-top"><p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>${e}</span></p><h1 class="ab-title">${t}</h1></div>`;
@@ -20,6 +20,21 @@ if(!loading){
  else if(profile.status==="Rejected")gate={msg:"Your payment was rejected. Upload a new proof on your dashboard. You can enrol once your registration is approved.",btn:"Go to dashboard",to:"dashboard"};
  else if(profile.status!=="Approved")gate={msg:profile.proof_path?"Your registration is awaiting approval. You can enrol in a workshop as soon as it is approved.":"Complete your registration payment first. Workshop enrolment opens once your registration is approved.",btn:"Go to dashboard",to:"dashboard"};
 }
+
+// Pop-up shown to anyone who is not yet verified. Once per browser session, so it never nags.
+const SEEN="ares26-wk-notice";
+const[note,setNote]=useState(false);
+useEffect(()=>{
+ if(loading||!gate)return;
+ try{if(sessionStorage.getItem(SEEN))return}catch(_){}
+ setNote(true)},[loading,!!gate]);
+const closeNote=()=>{setNote(false);try{sessionStorage.setItem(SEEN,"1")}catch(_){}};
+useEffect(()=>{
+ if(!note)return;
+ const k=e=>{if(e.key==="Escape")closeNote()};
+ document.addEventListener("keydown",k);
+ return()=>document.removeEventListener("keydown",k)},[note]);
+
 const feeOf=w=>profile?Number(profile.smc?w.feeSmc:w.feeNon)||0:0;
 const setPF=k=>e=>setPf({...pf,[k]:e.target.value});
 const openPay=w=>{setErr("");setPf({});setFile(null);setPayFor(w.id)};
@@ -81,6 +96,12 @@ const action=w=>{
  return h`<button class="btn block" disabled=${busy===w.id} onClick=${()=>enrol(w)}>${busy===w.id?"Sending...":"Request enrolment"}</button>`};
 
 return h`<div class="w sec ab">${Head("HANDS-ON","Workshops")}
+${note&&gate&&h`<div class="wk-modal" onClick=${e=>{if(e.target===e.currentTarget)closeNote()}}><div class="wk-dialog" role="dialog" aria-modal="true" aria-labelledby="wk-nt">
+<span class="ab-ico"><${Ic} n="lock"/></span>
+<h2 id="wk-nt">Verification required</h2>
+<p>Your account must be verified before you can enrol in the workshops.</p>
+<ul class="wk-fees"><li><b>SMC students</b><span>Free</span></li><li><b>Outside SMC</b><span>Around PKR 500</span></li></ul>
+<div class="row"><button class="btn o" onClick=${closeNote}>Not now</button><button class="btn" onClick=${()=>{closeNote();go(gate.to)}}>${gate.btn}</button></div></div></div>`}
 ${gate&&h`<div class="wk-gate" role="status"><span class="ab-ico sm"><${Ic} n="lock"/></span><div><p>${gate.msg}</p><button class="btn o s" onClick=${()=>go(gate.to)}>${gate.btn}</button></div></div>`}
 ${err&&!payFor&&h`<div class="err" role="alert">${err}</div>`}
 ${list.length?h`<div class="g c3">${list.map(w=>{
