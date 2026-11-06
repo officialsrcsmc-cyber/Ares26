@@ -7,6 +7,11 @@ const fixProps=p=>{if(!p)return p;p={...p};if(typeof p.style==="string"){p.style
 export const h=htm.bind((t,p,...c)=>React.createElement(t,fixProps(p),...c));
 export const BANK="Bank, account title and account number will be announced by the organizing committee.";
 export const FEES=[["SMC Students",500,"smc"],["Non SMC",1200,"non"],["With Ambassador Code",800,"amb"],["Post Graduate",1000,"pg"]];
+export const ABS_FEE=500;
+export const absRef=n=>"ARES26-ABS-"+n;
+export const absSlug=n=>"abstract-submission-"+n;
+export const absFeeRef=t=>{const m=/^abstract-submission-(\d+)$/.exec(t||"");return m?m[1]:null};
+export const absLink=n=>location.origin+import.meta.env.BASE_URL+"#"+absSlug(n);
 export const ACCTS=[["JazzCash","03227149136","Muhammad Akram"],["Easypaisa","03471786686","M. Ahsan Zubair"]];
 // Ambassador codes: [code, ambassador, college]. Hard-coded, edit here to add or remove.
 export const AMB=[

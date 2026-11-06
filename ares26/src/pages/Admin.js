@@ -1,5 +1,6 @@
-import {AMB,ambFind,waNum,waPretty,useState,useEffect,h,BANK,DISC,SECT,left,newWorkshop,wkDate} from '../shared.js';
+import {AMB,ambFind,waNum,waPretty,useState,useEffect,h,BANK,DISC,SECT,left,newWorkshop,wkDate,ABS_FEE,absRef,absLink} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
+import AdminFees from './AdminFees.js';
 
 const clean=c=>{let v=String(c??"");if(/^[=@\t\r]/.test(v)||/^[+-](?![0-9])/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'};
 const download=(name,rows)=>{const csv="\ufeff"+rows.map(r=>r.map(clean).join(",")).join("\r\n");
@@ -13,7 +14,7 @@ const isAdmin=!!(profile&&profile.is_admin);
 
 const load=async()=>{
  const a=await sb.from("profiles").select("*").order("created_at",{ascending:false});if(a.error)setMsg(a.error.message);else setRegs(a.data||[]);
- const b=await sb.from("abstracts").select("*, profiles(first_name,last_name,email)").order("created_at",{ascending:false});if(b.error)setMsg(b.error.message);else setAbss(b.data||[]);
+ const b=await sb.from("abstracts").select("*, profiles(first_name,last_name,email,phone)").order("created_at",{ascending:false});if(b.error)setMsg(b.error.message);else setAbss(b.data||[]);
  const c=await sb.from("workshop_enrollments").select("*, profiles(first_name,last_name,email,phone,institution,programme,smc,uhs_id,status)").order("created_at",{ascending:false});if(c.error)setMsg(c.error.message);else setEnrs(c.data||[])};
 useEffect(()=>{if(isAdmin)load()},[isAdmin]);
 useEffect(()=>{setDraft(ct)},[ct]);
@@ -33,7 +34,7 @@ const setAdmin=async(u,on)=>{const nm=(u.first_name||"")+" "+(u.last_name||"");
  setRegs(regs.map(r=>r.id==u.id?{...r,is_admin:on}:r));flash(on?nm.trim()+" is now an admin.":"Admin access removed.")};
 const removePerson=async u=>{const nm=((u.first_name||"")+" "+(u.last_name||"")).trim()||u.email;
  if(!window.confirm("Permanently remove "+nm+" ("+u.email+")?\n\nThis deletes their account, payment details and abstracts. It cannot be undone."))return;
- const files=[[ "payment-proofs",u.proof_path],...abss.filter(a=>a.user_id==u.id).map(a=>["abstract-files",a.file_path]),...enrs.filter(r=>r.user_id==u.id).map(r=>["payment-proofs",r.proof_path])].filter(f=>f[1]);
+ const files=[[ "payment-proofs",u.proof_path],...abss.filter(a=>a.user_id==u.id).map(a=>["abstract-files",a.file_path]),...enrs.filter(r=>r.user_id==u.id).map(r=>["payment-proofs",r.proof_path]),...abss.filter(a=>a.user_id==u.id).map(a=>["payment-proofs",a.fee_proof_path])].filter(f=>f[1]);
  for(const b of ["payment-proofs","abstract-files"]){const paths=files.filter(f=>f[0]==b).map(f=>f[1]);if(paths.length)await sb.storage.from(b).remove(paths)}
  const{error}=await sb.rpc("remove_user",{target:u.id});if(error)return flash(error.message);
  setRegs(regs.filter(r=>r.id!=u.id));setAbss(abss.filter(a=>a.user_id!=u.id));setEnrs(enrs.filter(r=>r.user_id!=u.id));flash(nm+" has been removed.")};
@@ -59,12 +60,12 @@ const waList=regs.filter(r=>waNum(r.phone));
 const exportWa=()=>download("ares26-whatsapp-list.csv",[["Name","WhatsApp number","WhatsApp number (digits only)"],...waList.map(r=>[((r.first_name||"")+" "+(r.last_name||"")).trim(),waPretty(r.phone),waNum(r.phone)])]);
 const exportVcf=()=>{const v=waList.map(r=>{const n=((r.first_name||"")+" "+(r.last_name||"")).trim();return"BEGIN:VCARD\r\nVERSION:3.0\r\nFN:ARES26 "+n.replace(/[,;\r\n]/g," ")+"\r\nTEL;TYPE=CELL:+"+waNum(r.phone)+"\r\nEND:VCARD"}).join("\r\n");
  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([v],{type:"text/vcard;charset=utf-8"}));a.download="ares26-whatsapp-contacts.vcf";document.body.appendChild(a);a.click();a.remove()};
-const exportAbs=()=>download("ares26-abstracts.csv",[["Submitted at","Author","Email","Title","Discipline","Category","Introduction","Methodology","Results","Conclusion","Authors","File uploaded","Status"],
- ...abss.map(a=>[a.created_at,a.profiles?a.profiles.first_name+" "+a.profiles.last_name:"",a.profiles?a.profiles.email:"",a.title,a.discipline,a.category,...SECT.map(s=>a.body[s]),(a.body.authors||[]).map(x=>x.name+(x.presenting?" [PRESENTING]":"")+(x.email?" <"+x.email+">":"")+" ("+x.affiliation+")").join("; "),a.file_path?"Yes":"No",a.status])]);
+const exportAbs=()=>download("ares26-abstracts.csv",[["Submitted at","Author","Email","Title","Discipline","Category","Introduction","Methodology","Results","Conclusion","Authors","File uploaded","Status","Ref no","Fee status","Fee tx ID"],
+ ...abss.map(a=>[a.created_at,a.profiles?a.profiles.first_name+" "+a.profiles.last_name:"",a.profiles?a.profiles.email:"",a.title,a.discipline,a.category,...SECT.map(s=>a.body[s]),(a.body.authors||[]).map(x=>x.name+(x.presenting?" [PRESENTING]":"")+(x.email?" <"+x.email+">":"")+" ("+x.affiliation+")").join("; "),a.file_path?"Yes":"No",a.status,absRef(a.ref_no),a.fee_status,a.fee_tx_id||""])]);
 
 return h`<div class="w sec"><div style="display:flex;justify-content:space-between"><h2>Admin panel</h2><button class="btn o s" onClick=${logout}>Sign out</button></div>
 ${msg&&h`<div class="ok">${msg}</div>`}
-<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">${[["reg","Registrations"],["abs","Abstracts"],["wk","Workshop approvals"+(cnt(enrs,"Pending")?" ("+cnt(enrs,"Pending")+")":"")],["amb","Ambassadors"],["ct","Content"],["csv","Export"]].map(([k,l])=>h`<button key=${k} class=${"btn s"+(tab==k?"":" o")} onClick=${()=>{setT(k);setSf("All");setQ("");setWkf("All")}}>${l}</button>`)}<button class="btn o s" onClick=${load}>Refresh</button></div>
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">${[["reg","Registrations"],["abs","Abstracts"],["fee","Abstract fees"+(abss.filter(x=>x.status==="Accepted"&&x.fee_status==="Pending").length?" ("+abss.filter(x=>x.status==="Accepted"&&x.fee_status==="Pending").length+")":"")],["wk","Workshop approvals"+(cnt(enrs,"Pending")?" ("+cnt(enrs,"Pending")+")":"")],["amb","Ambassadors"],["ct","Content"],["csv","Export"]].map(([k,l])=>h`<button key=${k} class=${"btn s"+(tab==k?"":" o")} onClick=${()=>{setT(k);setSf("All");setQ("");setWkf("All")}}>${l}</button>`)}<button class="btn o s" onClick=${load}>Refresh</button></div>
 <div class="g c5" style="margin-bottom:16px">${[["Registrations",regs.length],["Pending",cnt(regs,"Pending")],["Approved",cnt(regs,"Approved")],["Abstracts",abss.length],["Awaiting review",cnt(abss,"Submitted")+cnt(abss,"Under Review")],["Accepted",cnt(abss,"Accepted")],["Workshop requests",cnt(enrs,"Pending")+" pending"]].map(([l,n])=>h`<div class="card" key=${l} style="padding:12px"><b style="font-size:1.4rem">${n}</b><div class="mut" style="font-size:.8rem">${l}</div></div>`)}</div>
 ${(tab=="reg"||tab=="abs"||tab=="wk")&&h`<label style="max-width:240px">Filter by status<select value=${sf} onChange=${e=>setSf(e.target.value)}>${["All"].concat(tab!="abs"?["Pending","Approved","Rejected"]:["Submitted","Under Review","Accepted","Rejected"]).map(x=>h`<option key=${x}>${x}</option>`)}</select></label>`}
 ${tab=="reg"&&h`<div><input placeholder="Search name, email, UHS/SMC ID or transaction ID" value=${q} onInput=${e=>setQ(e.target.value)} style="margin-bottom:12px"/>
@@ -76,10 +77,12 @@ ${tab=="reg"&&h`<div><input placeholder="Search name, email, UHS/SMC ID or trans
 <td>${u.is_admin&&h`<span class="badge Accepted" style="margin-bottom:6px">Admin</span><br/>`}${u.id===session.user.id?h`<span class="mut">You</span>`:h`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn o s" onClick=${()=>setAdmin(u,!u.is_admin)}>${u.is_admin?"Remove admin":"Make admin"}</button>${!u.is_admin&&h`<button class="btn o s dng" onClick=${()=>removePerson(u)}>Remove</button>`}</div>`}</td></tr>`)}</table>${!shown.length&&h`<p class="mut">No registrations found.</p>`}</div></div>`}
 ${tab=="abs"&&h`<div>${absShown.map(a=>h`<div class="card" key=${a.id} style="margin-bottom:10px"><b>${a.title}</b><div class="mut" style="font-size:.85rem">${a.profiles?a.profiles.first_name+" "+a.profiles.last_name+" · "+a.profiles.email:""}<br/>${a.discipline} · ${a.category}</div>${(a.body.authors||[]).length>0&&h`<div style="margin:8px 0;font-size:.9rem"><b>Authors:</b><ol style="margin:4px 0 0;padding-left:20px">${a.body.authors.map((x,i)=>h`<li key=${i}>${x.name}${x.presenting&&h`<b> (presenting)</b>`} · ${x.email?h`<a href=${"mailto:"+x.email}>${x.email}</a>`:h`<span class="mut">no email</span>`} · <span class="mut">${x.affiliation}</span></li>`)}</ol></div>`}${SECT.map(s=>h`<p key=${s} style="margin:6px 0;font-size:.9rem"><b>${s}:</b> ${a.body[s]}</p>`)}
 ${a.file_path&&(links["a"+a.id]?h`<p><a href=${links["a"+a.id]} target="_blank" rel="noopener">Open attached file</a></p>`:h`<p><a onClick=${()=>open("a"+a.id,"abstract-files",a.file_path)}>View attached file</a></p>`)}
+${a.status==="Accepted"&&h`<p class="mut" style="margin:10px 0 0;font-size:.88rem">${absRef(a.ref_no)} · Fee: <b>${a.fee_link_at?a.fee_status:"link not generated"}</b>. Manage it in the <a onClick=${()=>setT("fee")}>Abstract fees</a> tab.</p>`}
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><span class=${"badge "+a.status.replace(/ /g,"")}>${a.status}</span>
 <button class="btn s" disabled=${a.status==="Accepted"} onClick=${()=>setStatus("abstracts",a.id,"Accepted")}>Accept</button>
 <button class="btn o s dng" disabled=${a.status==="Rejected"} onClick=${()=>setStatus("abstracts",a.id,"Rejected")}>Reject</button>
 ${Sel(a.status,v=>setStatus("abstracts",a.id,v),["Submitted","Under Review","Accepted","Rejected"])}</div></div>`)}${!abss.length&&h`<p class="mut">No abstracts yet.</p>`}</div>`}
+${tab=="fee"&&h`<${AdminFees} abss=${abss} setAbss=${setAbss} flash=${flash} links=${links} open=${open}/>`}
 ${tab=="wk"&&h`<div><p class="mut">Participants can only request a workshop once their registration is Approved. Approve a request to issue their ticket on the dashboard.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px"><label style="max-width:260px">Workshop<select value=${wkf} onChange=${e=>setWkf(e.target.value)}><option value="All">All workshops</option>${(ct.workshops||[]).map(w=>h`<option key=${w.id} value=${w.id}>${w.title||"Untitled"}</option>`)}</select></label>
 <input placeholder="Search name, email, ID or workshop" value=${q} onInput=${e=>setQ(e.target.value)} style="flex:1;min-width:200px;align-self:flex-end"/></div>

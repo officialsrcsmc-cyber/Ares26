@@ -215,3 +215,5 @@ drop policy if exists "abstracts insert own" on public.abstracts;
 drop policy if exists "abstracts insert approved own" on public.abstracts;
 create policy "abstracts insert approved own" on public.abstracts for insert to authenticated
   with check (user_id = auth.uid() and status = 'Submitted' and public.is_approved());
+
+-- ============ ABSTRACT FEE (PKR 500 printing & setup) -- run supabase/abstract_fee.sql after this file ============

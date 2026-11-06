@@ -1,4 +1,4 @@
-import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq,Ic,withWkIds} from './shared.js';
+import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq,Ic,withWkIds,absFeeRef} from './shared.js';
 import {sb} from './supabase.js';
 
 import Home from './pages/Home.js';
@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard.js';
 import Admin from './pages/Admin.js';
 import Teams from './pages/Teams.js';
 import Workshops from './pages/Workshops.js';
+import AbstractFee from './pages/AbstractFee.js';
 
 const Head=(e,t)=>h`<div class="ab-top"><p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>${e}</span></p><h1 class="ab-title">${t}</h1></div>`;
 const Txt=(t,b)=>()=>h`<div class="w sec ab txt">${Head("INFORMATION",t)}<div class="ab-note"><p>${b}</p></div></div>`;
@@ -19,7 +20,7 @@ const AdminGate=P=>{if(P.session===undefined||(P.session&&P.profile===undefined)
 
 const PAGES={home:Home,register:Registration,login:Login,reset:Reset,abstracts:Abstracts,teams:Teams,dashboard:Dashboard,"ares-admin":AdminGate,
 faqs:P=>h`<div class="w sec ab">${Head("FREQUENTLY ASKED","FAQs")}<${Faq} ct=${P.ct}/></div>`,
-workshops:Workshops,
+workshops:Workshops,"abstract-fee":AbstractFee,
 terms:Txt("Terms of use","Placeholder. The organizing committee will publish the full Terms of Use before registration opens."),
 conduct:Txt("Code of conduct","Placeholder. ARES’26 expects respectful, honest and inclusive conduct from every participant. Full text to follow.")};
 const validContent=c=>c&&Array.isArray(c.dates)&&Array.isArray(c.team)&&Array.isArray(c.faqs);
@@ -27,8 +28,11 @@ const validContent=c=>c&&Array.isArray(c.dates)&&Array.isArray(c.team)&&Array.is
 function Setup(){return h`<div class="w sec" style="max-width:560px"><h2>Setup needed</h2><p class="mut">The site cannot find its Supabase settings. Copy <b>.env.example</b> to <b>.env</b>, fill in your project URL and anon key, then restart <b>npm run dev</b>. On a hosting service, add the same two variables in its environment settings and redeploy.</p></div>`}
 
 export default function App(){
-const[pg,setPg]=useState(()=>{const h=location.hash||"";if(/type=signup/.test(h))return"login";const t=h.slice(1);return PAGES[t]?t:"home"}),[menu,setMenu]=useState(false),
+const[pg,setPg]=useState(()=>{const h=location.hash||"";if(/type=signup/.test(h))return"login";const t=h.slice(1);if(absFeeRef(t))return"abstract-fee";return PAGES[t]?t:"home"}),[fref,setFref]=useState(()=>absFeeRef((location.hash||"").slice(1))),[menu,setMenu]=useState(false),
 [session,setSession]=useState(undefined),[profile,setProfile]=useState(undefined),[abs,setA]=useState([]),[ct,setC]=useState(DEF),[enr,setEnr]=useState([]);
+
+// private abstract fee link: #abstract-submission-<ref_no> (also works when pasted while the site is already open)
+useEffect(()=>{const f=()=>{const r=absFeeRef((location.hash||"").slice(1));if(r){setFref(r);setPg("abstract-fee")}};window.addEventListener("hashchange",f);return()=>window.removeEventListener("hashchange",f)},[]);
 
 // auth session
 useEffect(()=>{if(!sb)return;
@@ -49,9 +53,9 @@ const refresh=async()=>{
 useEffect(()=>{refresh()},[session&&session.user.id]);
 
 useEffect(()=>{if(!menu)return;const k=e=>{if(e.key==="Escape")setMenu(false)};window.addEventListener("keydown",k);return()=>window.removeEventListener("keydown",k)},[menu]);
-const go=p=>{setPg(p);setMenu(false);window.scrollTo(0,0);try{location.hash=p}catch(e){}};
+const go=p=>{const r=absFeeRef(p);if(r)setFref(r);setPg(r?"abstract-fee":p);setMenu(false);window.scrollTo(0,0);try{location.hash=p}catch(e){}};
 const logout=async()=>{await sb.auth.signOut();setProfile(null);setA([]);setEnr([]);go("home")};
-const P={go,sb,session,profile,refresh,logout,abs,ct,setC,enr},Page=PAGES[pg]||Home;
+const P={go,sb,session,profile,refresh,logout,abs,ct,setC,enr,fref},Page=PAGES[pg]||Home;
 const nav=(k,l,mob)=>h`<a key=${k} href=${"#"+k} class=${pg==k?"on":""} aria-current=${pg==k?"page":undefined} onClick=${e=>{e.preventDefault();go(k)}}>${l}</a>`;
 const adm=profile&&profile.is_admin;
 return h`<div><header class=${pg==="abstracts"?"hd-static":""}><div class="w hd"><a href="#home" class="brand" aria-label="ARES’26 home" onClick=${e=>{e.preventDefault();go("home")}}><img src=${LOGO_LIGHT} alt="ARES’26"/></a><div class="sp"/><nav aria-label="Main">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>

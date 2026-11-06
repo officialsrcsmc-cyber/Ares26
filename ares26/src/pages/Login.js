@@ -6,7 +6,8 @@ const{go}=P;const[e,setE]=useState(""),[p,setP]=useState(""),[er,setEr]=useState
 const ok=async()=>{setEr("");setInfo("");if(!e||!p)return setEr("Enter your email and password.");setBusy(true);
  const{error}=await sb.auth.signInWithPassword({email:e.trim(),password:p});setBusy(false);
  if(error)return setEr(/confirm/i.test(error.message)?"Please confirm your email first. Check your inbox for the link.":"Email or password is incorrect.");
- go("dashboard")};
+ let back="dashboard";try{const x=sessionStorage.getItem("ares26_after_login");if(x){back=x;sessionStorage.removeItem("ares26_after_login")}}catch(_){}
+ go(back)};
 const forgot=async()=>{setEr("");setInfo("");if(!e)return setEr("Type your email above first.");
  const{error}=await sb.auth.resetPasswordForEmail(e.trim(),{redirectTo:location.origin});
  error?setEr(error.message):setInfo("If that email is registered, a reset link is on its way.")};

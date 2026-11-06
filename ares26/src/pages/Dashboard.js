@@ -1,4 +1,4 @@
-import {useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,ambFind,DISC,SECT,left,wkDate} from '../shared.js';
+import {useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,ambFind,DISC,SECT,left,wkDate,ABS_FEE,absRef,absSlug} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 export default function Dashboard(P){
@@ -70,5 +70,6 @@ ${ok?h`<span class="tkt-bars" aria-hidden="true"></span><p class="tkt-note">Admi
  msg=st==="Accepted"?"Congratulations! Your abstract has been accepted for "+a.category.toLowerCase()+" presentation. Further instructions will be shared with you.":st==="Rejected"?"Unfortunately your abstract was not accepted this time. Thank you for submitting, and we hope to see you at ARES’26.":st==="Under Review"?"Your abstract is being reviewed by the scientific committee.":"We received your abstract. It will be reviewed soon.";
  return h`<div class=${"item astat "+st.replace(/ /g,"")} key=${a.id}><b>${a.title}</b><div class="meta">${a.discipline}, ${a.category}</div>
 <ol class="trk" aria-label="Abstract progress">${steps.map((x,i)=>h`<li key=${x} class=${(i<at||(i==at&&st!=="Submitted"&&st!=="Under Review")?"done ":"")+(i==at?"cur":"")}><i aria-hidden="true">${i<at||(i==at&&(st==="Accepted"||st==="Rejected"))?(st==="Rejected"&&i==at?"✕":"✓"):i+1}</i><span>${x}</span></li>`)}</ol>
-<p class="amsg" role="status">${msg}</p></div>`}):h`<p class="empty">You have not submitted an abstract yet. Submit one to see its acceptance status here.</p>`}
+<p class="amsg" role="status">${msg}</p>
+${st==="Accepted"&&h`<div style="margin-top:10px"><p class="mut" style="font-size:.9rem;margin:0 0 8px">${absRef(a.ref_no)} · Printing & setup fee: <span class=${"badge "+(a.fee_status==="Approved"?"Accepted":a.fee_status==="Rejected"?"Rejected":a.fee_status==="Pending"?"Pending":"Submitted")}>${a.fee_status==="Unpaid"?(a.fee_link_at?"PKR "+ABS_FEE+" due":"Link coming soon"):a.fee_status}</span></p>${a.fee_link_at&&a.fee_status!=="Approved"&&a.fee_status!=="Pending"&&h`<button class="btn s" onClick=${()=>go(absSlug(a.ref_no))}>${a.fee_status==="Rejected"?"Upload new payment proof":"Pay PKR "+ABS_FEE+" fee"}</button>`}</div>`}</div>`}):h`<p class="empty">You have not submitted an abstract yet. Submit one to see its acceptance status here.</p>`}
 <button class="btn" onClick=${()=>go("abstracts")}>New abstract</button></section></div>`}

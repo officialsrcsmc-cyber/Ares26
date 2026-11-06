@@ -1,4 +1,4 @@
-import {useState,useEffect,useRef,h,BANK,DISC,SECT,left,Ic,Acc} from '../shared.js';
+import {useState,useEffect,useRef,h,BANK,DISC,SECT,left,Ic,Acc,ABS_FEE,absRef} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 const FMT=[["Word limit","Max 300 words (excl. title, keywords, author details)"],["Font","Arial or Calibri, size 12"],["Spacing","Single line spacing (1.0)"],["Language","English"],["File format","MS Word — .doc or .docx"]];
@@ -7,7 +7,7 @@ const CATS=[["Original Research Studies","Cross-sectional studies; cohort studie
 ["Database & Population-Based Studies","CDC WONDER database studies; Global Burden of Disease (GBD) studies; other large-scale national or international database and registry-based studies."]];
 const CONTENT=[["Title","Concise and reflective of the research"],["Introduction","Background, rationale and objectives"],["Methodology","Study design, sample, tools and data analysis"],["Results","Key findings, including a numeric/statistical summary"],["Conclusion & recommendations",""],["Keywords","3–5 terms, preferably using MeSH terms"]];
 const PRES=[["Modes of presentation","Oral and Poster"],["Top 3 presentations","Cash prizes"],["Certificates","Awarded to all participants & presenters"],["CME points","For Pre-Conference Workshop participants and scientific-session presenters (oral or poster)"]];
-const STEPS=["Register and upload your fee payment receipt. Abstract submission opens once the team approves your registration.","Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","Final PowerPoint presentation / poster due: by 19 Nov 2026."];
+const STEPS=["Register and upload your fee payment receipt. Abstract submission opens once the team approves your registration.","Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","If your abstract is selected, you will be sent a private payment link. Pay the PKR 500 printing and setup fee and upload your receipt there.","Final PowerPoint presentation / poster due: by 19 Nov 2026."];
 const POLICY=[["Multiple authorships permitted","You may be listed as an author or co-author on more than one submitted abstract."],["One presentation per person","You may serve as the presenting author for only ONE accepted abstract, whether oral or poster."],["More than one acceptance","If you're the presenting author on more than one accepted abstract, nominate another listed co-author to present the rest — they must complete the required registration."],["Designated presenter","Every abstract names one presenting author, responsible for delivering it and answering questions."]];
 
 
@@ -58,6 +58,8 @@ ${PRES.map(([t,d],i)=>h`<div class="ab-pc" key=${t}><span class="ab-ico"><${Ic} 
 <ol class="ab-tl">${STEPS.map((s,i)=>{const pay=/PKR|receipt/i.test(s),date=/\d{1,2} Nov 2026/.test(s);
 return h`<li key=${i}><span class="ab-num" aria-hidden="true">${i+1}</span><div class="ab-step"><p>${mark(s,/(\d{1,2} Nov 2026|PKR [\d,]+)/)}</p>${(pay||date)&&h`<span class=${"ab-tag"+(pay?" pay":"")}>${pay?"Payment":"Key date"}</span>`}</div></li>`})}</ol>
 <//>
+
+<${Sec} t="Printing & setup fee" id="ab-fee"><div class="ab-fmt"><div class="ab-fc wide"><span class="ab-ico sm"><${Ic} n="file" size=${20}/></span><div><p class="ab-lbl dk">PKR ${ABS_FEE} per accepted abstract</p><p class="ab-txt">Covers printing and setup of your oral or poster presentation. There is nothing to pay when you submit. Only authors whose abstract is selected are sent a private link to a payment page for their own abstract, where they upload the transfer receipt.</p></div></div></div><//>
 
 <${Sec} t="Authorship & presenting author policy" id="ab-pol">
 <ul class="ab-pol">${POLICY.map(([t,d])=>h`<li key=${t}><span class="ab-ck"><${Ic} n="check" size=${16}/></span><p><b>${t}</b> — ${mark(d,/\b(ONE)\b/,"strong")}</p></li>`)}</ul>
@@ -133,10 +135,10 @@ const submit=async()=>{
  setErr("");setBusy(true);
  try{const path=file?await upload("abstract-files",session.user.id,file):null;
   const A=au.map((x,i)=>({name:x.n.trim(),email:x.e.trim(),affiliation:x.a.trim(),presenting:i===pres}));
-  const{data,error}=await sb.from("abstracts").insert({user_id:session.user.id,title:f.title.trim(),discipline:f.disc,category:f.cat,body:{...Object.fromEntries(SECT.map(s=>[s,f[s].trim()])),authors:A},file_path:path,status:"Submitted"}).select("id").single();
+  const{data,error}=await sb.from("abstracts").insert({user_id:session.user.id,title:f.title.trim(),discipline:f.disc,category:f.cat,body:{...Object.fromEntries(SECT.map(s=>[s,f[s].trim()])),authors:A},file_path:path,status:"Submitted"}).select("id,ref_no").single();
   if(error)throw error;
   try{localStorage.removeItem(DKEY+session.user.id)}catch(e){}
-  const ref="ARES26-ABS-"+String(data&&data.id||Date.now()).replace(/-/g,"").slice(0,8).toUpperCase();
+  const ref=data&&data.ref_no?absRef(data.ref_no):"ARES26-ABS-"+String(data&&data.id||Date.now()).replace(/-/g,"").slice(0,8).toUpperCase();
   setDone({ref,title:f.title.trim(),cat:f.cat,disc:f.disc,words:total,authors:A,fileName:file?file.name:""});
   setBusy(false);toTop();try{await refresh()}catch(e){}return}
  catch(e){setErr(/row-level security|policy/i.test((e&&e.message)||"")?"Only approved registrations can submit an abstract. Check your status on your dashboard.":(e&&e.message)||"Submission failed. Check your connection and try again. Your draft is still saved.")}
@@ -171,7 +173,7 @@ if(session===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></
 else if(!session)body=h`<div class="auth"><h2>Abstract submission</h2><p class="sub">You need to be logged in to submit an abstract.</p><div class="panel"><button class="btn block" onClick=${()=>go("login")}>Log in</button></div></div>`;
 else if(profile===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></div>`;
 else if(gate&&!done)body=h`<div class="auth"><div class="wk-banner" role="status"><span class="ab-ico sm"><${Ic} n="lock"/></span><div class="wk-bn-body"><h2>Account verification required</h2><p>Your account must be verified and your registration fee approved before you can submit an abstract. ${gate.msg}</p><button class="btn s" onClick=${()=>go(gate.to)}>${gate.btn}</button></div></div></div>`;
-else if(done)body=h`<div class="af af-wrap" ref=${topRef}><div class="af-ok"><span class="af-ok-i"><${Ic} n="check" size=${34}/></span><h2 data-stephead tabIndex="-1">Abstract submitted</h2><p class="af-lead">Thank you. Your abstract has been received and will be peer-reviewed. Track its status on your dashboard.</p>
+else if(done)body=h`<div class="af af-wrap" ref=${topRef}><div class="af-ok"><span class="af-ok-i"><${Ic} n="check" size=${34}/></span><h2 data-stephead tabIndex="-1">Abstract submitted</h2><p class="af-lead">Thank you. Your abstract has been received and will be peer-reviewed. Track its status on your dashboard. If it is selected, you will be sent a private link to pay the PKR ${ABS_FEE} printing and setup fee.</p>
 <div class="af-ref"><span>Reference number</span><b>${done.ref}</b><small>Please keep this for your records.</small></div>
 <dl class="af-sum"><div><dt>Title</dt><dd>${done.title}</dd></div><div><dt>Category</dt><dd>${done.cat} · ${done.disc}</dd></div><div><dt>Authors</dt><dd>${done.authors.map(a=>a.name+(a.presenting?" (presenting)":"")).join(", ")}</dd></div><div><dt>Length</dt><dd>${done.words} words</dd></div>${done.fileName&&h`<div><dt>Attachment</dt><dd>${done.fileName}</dd></div>`}</dl>
 <div class="af-ok-btns"><button class="btn block" onClick=${()=>go("dashboard")}>Go to dashboard</button><button class="btn o block" onClick=${again}>Submit another abstract</button></div></div></div>`;
