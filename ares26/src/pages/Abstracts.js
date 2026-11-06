@@ -65,7 +65,7 @@ return h`<li key=${i}><span class="ab-num" aria-hidden="true">${i+1}</span><div 
 </div>`};
 
 /* ---------- Submission form: 4-step flow ---------- */
-const LIM_WORDS=300,LIM_TITLE=150,MAXA=10,DKEY="ares26_abstract_draft_v2:";
+const LIM_WORDS=300,MAXA=10,DKEY="ares26_abstract_draft_v2:";
 const STEP_NAMES=["Details","Authors","Abstract","Review"];
 const ORD=["First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth"];
 const INIT={title:"",disc:DISC[0],cat:"Oral",Introduction:"",Methodology:"",Results:"",Conclusion:""};
@@ -102,7 +102,7 @@ useEffect(()=>{document.querySelectorAll(".af-ta").forEach(grow)},[step,loaded,d
 /* --- validation --- */
 const total=SECT.reduce((n,s)=>n+wc(f[s]),0);
 const E={};
-if(!f.title.trim())E.title="Enter a title for your abstract.";else if(f.title.length>LIM_TITLE)E.title="Title must be "+LIM_TITLE+" characters or fewer.";
+if(!f.title.trim())E.title="Enter a title for your abstract.";
 au.forEach((x,i)=>{if(!x.n.trim())E["n"+i]="Enter the author’s full name.";if(!x.a.trim())E["a"+i]="Enter the author’s affiliation.";const em=x.e.trim();
  if(i===0&&!em)E["e"+i]="Enter the first author’s email.";else if(em&&!emailOk(em))E["e"+i]="Enter a valid email, like name@example.com."});
 SECT.forEach(s=>{if(!wc(f[s]))E[s]="Please complete this section."});
@@ -170,7 +170,7 @@ const stepHead=(n,t,sub)=>h`<div class="af-sh"><h2 data-stephead tabIndex="-1">$
 const edit=n=>h`<button type="button" class="af-edit" onClick=${()=>goStep(n)}>Edit</button>`;
 let content;
 if(step===1)content=h`<div>${stepHead(1,"Abstract details","Tell us what your work is about.")}
-${F("title","Title",{req:1,hint:"Concise and reflective of your research.",cnt:h`<p class=${"af-cnt "+lvl(f.title.length,LIM_TITLE)} id="af-c-title"><span></span><span>${f.title.length} / ${LIM_TITLE} characters</span></p>`},p=>h`<input ...${p} type="text" value=${f.title} placeholder="XYZ" onInput=${setV("title")} enterKeyHint="next"/>`)}
+${F("title","Title",{req:1,hint:"Concise and reflective of your research."},p=>h`<input ...${p} type="text" value=${f.title} placeholder="XYZ" onInput=${setV("title")} enterKeyHint="next"/>`)}
 ${F("disc","Discipline",{req:1},p=>h`<select ...${p} value=${f.disc} onChange=${setV("disc")}>${DISC.map(d=>h`<option key=${d}>${d}</option>`)}</select>`)}
 <fieldset class="af-fs"><legend>Category <span class="af-req" aria-hidden="true">*</span><span class="sr"> (required)</span></legend>
 <div class="af-radios">${[["Oral","Presentation"],["Poster","Printed display"]].map(([v,d])=>h`<label class=${"af-rad"+(f.cat===v?" on":"")} key=${v}><input type="radio" name="cat" value=${v} checked=${f.cat===v} onChange=${setV("cat")}/><span><b>${v}</b><small>${d}</small></span></label>`)}</div>

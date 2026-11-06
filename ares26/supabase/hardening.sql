@@ -23,5 +23,5 @@ alter table public.profiles add constraint profile_field_limits check (
 
 alter table public.abstracts drop constraint if exists abstract_limits;
 alter table public.abstracts add constraint abstract_limits check (
-  char_length(title) between 1 and 300 and pg_column_size(body) <= 30000 and
+  char_length(title) >= 1 and pg_column_size(body) <= 30000 and
   body ? 'Introduction' and body ? 'Methodology' and body ? 'Results' and body ? 'Conclusion');
