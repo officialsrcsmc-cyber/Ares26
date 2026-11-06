@@ -7,7 +7,7 @@ const CATS=[["Original Research Studies","Cross-sectional studies; cohort studie
 ["Database & Population-Based Studies","CDC WONDER database studies; Global Burden of Disease (GBD) studies; other large-scale national or international database and registry-based studies."]];
 const CONTENT=[["Title","Concise and reflective of the research"],["Introduction","Background, rationale and objectives"],["Methodology","Study design, sample, tools and data analysis"],["Results","Key findings, including a numeric/statistical summary"],["Conclusion & recommendations",""],["Keywords","3–5 terms, preferably using MeSH terms"]];
 const PRES=[["Modes of presentation","Oral and Poster"],["Top 3 presentations","Cash prizes"],["Certificates","Awarded to all participants & presenters"],["CME points","For Pre-Conference Workshop participants and scientific-session presenters (oral or poster)"]];
-const STEPS=["Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","Final PowerPoint presentation / poster due: by 19 Nov 2026.","After acceptance, pay the registration fee per participant/presenter (see above for the registration fees).","Upload the fee payment receipt in the registration form on the website."];
+const STEPS=["Register and upload your fee payment receipt. Abstract submission opens once the team approves your registration.","Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","Final PowerPoint presentation / poster due: by 19 Nov 2026."];
 const POLICY=[["Multiple authorships permitted","You may be listed as an author or co-author on more than one submitted abstract."],["One presentation per person","You may serve as the presenting author for only ONE accepted abstract, whether oral or poster."],["More than one acceptance","If you're the presenting author on more than one accepted abstract, nominate another listed co-author to present the rest — they must complete the required registration."],["Designated presenter","Every abstract names one presenting author, responsible for delivering it and answering questions."]];
 
 
@@ -127,6 +127,7 @@ const saveNow=()=>{if(write())setSaved("saved")};
 /* --- submit --- */
 const submit=async()=>{
  if(busy)return;
+ if(!profile||profile.status!=="Approved"){setErr("Your registration must be approved before you can submit an abstract.");return}
  const badStep=[1,2,3].find(stepBad);
  if(badStep){touch([1,2,3].flatMap(keysFor));setErr("Some required details are missing or need fixing. We’ve taken you to the first one.");setStep(badStep);toTop();const k=keysFor(badStep).find(k=>E[k]);if(k)focusKey(k);return}
  setErr("");setBusy(true);
@@ -138,7 +139,7 @@ const submit=async()=>{
   const ref="ARES26-ABS-"+String(data&&data.id||Date.now()).replace(/-/g,"").slice(0,8).toUpperCase();
   setDone({ref,title:f.title.trim(),cat:f.cat,disc:f.disc,words:total,authors:A,fileName:file?file.name:""});
   setBusy(false);toTop();try{await refresh()}catch(e){}return}
- catch(e){setErr((e&&e.message)||"Submission failed. Check your connection and try again. Your draft is still saved.")}
+ catch(e){setErr(/row-level security|policy/i.test((e&&e.message)||"")?"Only approved registrations can submit an abstract. Check your status on your dashboard.":(e&&e.message)||"Submission failed. Check your connection and try again. Your draft is still saved.")}
  setBusy(false)};
 const again=()=>{setDone(null);setF(INIT);setAu([{n:((profile&&profile.first_name)||"")+" "+((profile&&profile.last_name)||""),e:(profile&&profile.email)||"",a:(profile&&profile.institution)||""}].map(x=>({...x,n:x.n.trim()})));setPres(0);setFile(null);setT({});setErr("");setStep(1);hadDraft.current=false;setRestored(false);setSaved("idle");toTop()};
 
@@ -158,9 +159,18 @@ const dlc=days===null?"lv-ok":days<0?"lv-over":days<=3?"lv-warn":"lv-ok";
 const banner=dl?h`<div class=${"af-dl "+dlc} role="status"><span class="af-dl-i"><${Ic} n="clock" size=${22}/></span><div><b>Abstract deadline: ${dl}${iso?" "+iso.slice(0,4):""}</b><span>${days===null?"":days<0?"The deadline has passed.":days===0?"Last day to submit — closes tonight.":days===1?"1 day remaining":days+" days remaining"}</span></div></div>`:null;
 
 const savedTxt=saved==="saving"?"Saving…":saved==="saved"?"Draft saved":saved==="error"?"Couldn’t save draft (storage blocked)":"";
+/* --- only people with an Approved (verified, fee-paid) registration may submit --- */
+let gate=null;
+if(session){
+ if(!profile)gate={msg:"We could not load your registration. Open your dashboard and try again.",btn:"Go to dashboard",to:"dashboard"};
+ else if(profile.status==="Rejected")gate={msg:"Your payment was rejected. Upload a new proof on your dashboard. You can submit an abstract once your registration is approved.",btn:"Go to dashboard",to:"dashboard"};
+ else if(profile.status!=="Approved")gate={msg:profile.proof_path?"Your registration is awaiting approval. You can submit an abstract as soon as it is approved.":"Complete your registration payment first. Abstract submission opens once your registration is approved.",btn:"Go to dashboard",to:"dashboard"};
+}
 let body;
 if(session===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></div>`;
 else if(!session)body=h`<div class="auth"><h2>Abstract submission</h2><p class="sub">You need to be logged in to submit an abstract.</p><div class="panel"><button class="btn block" onClick=${()=>go("login")}>Log in</button></div></div>`;
+else if(profile===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></div>`;
+else if(gate&&!done)body=h`<div class="auth"><div class="wk-banner" role="status"><span class="ab-ico sm"><${Ic} n="lock"/></span><div class="wk-bn-body"><h2>Account verification required</h2><p>Your account must be verified and your registration fee approved before you can submit an abstract. ${gate.msg}</p><button class="btn s" onClick=${()=>go(gate.to)}>${gate.btn}</button></div></div></div>`;
 else if(done)body=h`<div class="af af-wrap" ref=${topRef}><div class="af-ok"><span class="af-ok-i"><${Ic} n="check" size=${34}/></span><h2 data-stephead tabIndex="-1">Abstract submitted</h2><p class="af-lead">Thank you. Your abstract has been received and will be peer-reviewed. Track its status on your dashboard.</p>
 <div class="af-ref"><span>Reference number</span><b>${done.ref}</b><small>Please keep this for your records.</small></div>
 <dl class="af-sum"><div><dt>Title</dt><dd>${done.title}</dd></div><div><dt>Category</dt><dd>${done.cat} · ${done.disc}</dd></div><div><dt>Authors</dt><dd>${done.authors.map(a=>a.name+(a.presenting?" (presenting)":"")).join(", ")}</dd></div><div><dt>Length</dt><dd>${done.words} words</dd></div>${done.fileName&&h`<div><dt>Attachment</dt><dd>${done.fileName}</dd></div>`}</dl>

@@ -209,3 +209,9 @@ create policy "wk update admin" on public.workshop_enrollments for update to aut
 drop policy if exists "wk delete own pending or admin" on public.workshop_enrollments;
 create policy "wk delete own pending or admin" on public.workshop_enrollments for delete to authenticated
   using ((user_id = auth.uid() and status = 'Pending') or public.is_admin());
+
+-- ============ ABSTRACTS: APPROVED REGISTRATIONS ONLY (same as supabase/abstracts_approved.sql) ============
+drop policy if exists "abstracts insert own" on public.abstracts;
+drop policy if exists "abstracts insert approved own" on public.abstracts;
+create policy "abstracts insert approved own" on public.abstracts for insert to authenticated
+  with check (user_id = auth.uid() and status = 'Submitted' and public.is_approved());
