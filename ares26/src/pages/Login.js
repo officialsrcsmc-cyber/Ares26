@@ -9,7 +9,7 @@ const ok=async()=>{setEr("");setInfo("");if(!e||!p)return setEr("Enter your emai
  let back="dashboard";try{const x=sessionStorage.getItem("ares26_after_login");if(x){back=x;sessionStorage.removeItem("ares26_after_login")}}catch(_){}
  go(back)};
 const forgot=async()=>{setEr("");setInfo("");if(!e)return setEr("Type your email above first.");
- const{error}=await sb.auth.resetPasswordForEmail(e.trim(),{redirectTo:location.origin});
+ const{error}=await sb.auth.resetPasswordForEmail(e.trim(),{redirectTo:location.origin+"/ares26/"});
  error?setEr(error.message):setInfo("If that email is registered, a reset link is on its way.")};
 return h`<div class="auth"><h2>Log in</h2><p class="sub">Access your registration, payment and abstracts.</p>
 <div class="panel">

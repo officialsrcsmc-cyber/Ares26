@@ -3,6 +3,7 @@ import {sb} from '../supabase.js';
 
 export default function Reset(P){
 const{go,session}=P;const[a,setA]=useState(""),[b,setB]=useState(""),[er,setEr]=useState(""),[done,setDone]=useState(false);
+if(session===undefined)return h`<div class="auth"><p class="sub">Loading...</p></div>`;
 if(!session)return h`<div class="auth"><h2>Reset password</h2><p class="sub">Open the reset link from your email to set a new password. Request one from the log in page.</p><div class="panel"><button class="btn block" onClick=${()=>go("login")}>Go to log in</button></div></div>`;
 const save=async()=>{if(a.length<8)return setEr("Use a password of at least 8 characters.");if(a!==b)return setEr("Passwords do not match.");
  const{error}=await sb.auth.updateUser({password:a});error?setEr(error.message):setDone(true)};

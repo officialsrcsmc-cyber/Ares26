@@ -20,7 +20,7 @@ const submit=async()=>{
  if((f.phone||"").replace(/\D/g,"").length<10)return setErr("Enter a valid WhatsApp number, for example 0300 1234567.");
  if(!f.agree)return setErr("Accept the Terms of Use and Code of Conduct to submit.");
  setErr("");setBusy(true);
- const{data,error}=await sb.auth.signUp({email:f.email.trim(),password:f.pw,options:{emailRedirectTo:location.origin,
+ const{data,error}=await sb.auth.signUp({email:f.email.trim(),password:f.pw,options:{emailRedirectTo:location.origin+"/ares26/",
   data:{first_name:f.fn.trim(),last_name:f.ln.trim(),smc:smc,uhs_id:smc?(f.uhs||"").trim():"",phone:f.phone.trim(),institution:f.inst.trim(),programme:f.prog.trim(),degree_year:f.year.trim(),agreed_at:new Date().toISOString()}}});
  setBusy(false);
  if(error)return setErr(error.message);

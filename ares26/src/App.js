@@ -28,7 +28,7 @@ const validContent=c=>c&&Array.isArray(c.dates)&&Array.isArray(c.team)&&Array.is
 function Setup(){return h`<div class="w sec" style="max-width:560px"><h2>Setup needed</h2><p class="mut">The site cannot find its Supabase settings. Copy <b>.env.example</b> to <b>.env</b>, fill in your project URL and anon key, then restart <b>npm run dev</b>. On a hosting service, add the same two variables in its environment settings and redeploy.</p></div>`}
 
 export default function App(){
-const[pg,setPg]=useState(()=>{const h=location.hash||"";if(/type=signup/.test(h))return"login";const t=h.slice(1);if(absFeeRef(t))return"abstract-fee";return PAGES[t]?t:"home"}),[fref,setFref]=useState(()=>absFeeRef((location.hash||"").slice(1))),[menu,setMenu]=useState(false),
+const[pg,setPg]=useState(()=>{const h=location.hash||"";if(/type=signup/.test(h))return"login";if(/type=recovery/.test(h))return"reset";const t=h.slice(1);if(absFeeRef(t))return"abstract-fee";return PAGES[t]?t:"home"}),[fref,setFref]=useState(()=>absFeeRef((location.hash||"").slice(1))),[menu,setMenu]=useState(false),
 [session,setSession]=useState(undefined),[profile,setProfile]=useState(undefined),[abs,setA]=useState([]),[ct,setC]=useState(DEF),[enr,setEnr]=useState([]);
 
 // private abstract fee link: #abstract-submission-<ref_no> (also works when pasted while the site is already open)
