@@ -53,7 +53,7 @@ const cancel=async e=>{
  await refresh();setBusy("")};
 
 const payForm=w=>h`<div class="panel" style="margin-top:10px">
-<p class="ab-lbl">Send payment to</p><div class="pf-grid">${ACCTS.map(([b,n,o])=>h`<div class="pf-card acct" key=${b}><span class="ab-ico sm"><${Ic} n="phone"/></span><div class="pf-body"><p class="ab-lbl">${b}</p><p class="ab-val pf-num">${n}</p><p class="ab-txt">${o}</p></div></div>`)}</div>
+<p class="ab-lbl">Send payment to</p><div class="pf-grid">${ACCTS.map(([b,n,o])=>h`<div class="pf-card acct" key=${n}><span class="ab-ico sm"><${Ic} n="phone"/></span><div class="pf-body"><p class="ab-lbl">${b}</p><p class="ab-val pf-num">${n}</p><p class="ab-txt">${o}</p></div></div>`)}</div>
 <p class="mut" style="font-size:.9rem;margin:10px 0 0">Fee: ${feeLabel(feeOf(w))}. Pay the fee, then enter the transfer details below.</p>
 <label>Transaction date & time<input type="datetime-local" value=${pf.txd||""} onInput=${setPF("txd")}/></label>
 <label>Account name<input value=${pf.acct||""} onInput=${setPF("acct")}/></label>

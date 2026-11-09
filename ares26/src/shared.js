@@ -12,7 +12,7 @@ export const absRef=n=>"ARES26-ABS-"+n;
 export const absSlug=n=>"abstract-submission-"+n;
 export const absFeeRef=t=>{const m=/^abstract-submission-(\d+)$/.exec(t||"");return m?m[1]:null};
 export const absLink=n=>location.origin+import.meta.env.BASE_URL+"#"+absSlug(n);
-export const ACCTS=[["JazzCash","03227149136","Muhammad Akram"],["Easypaisa","03471786686","M. Ahsan Zubair"]];
+export const ACCTS=[["JazzCash","03227149136","Muhammad Akram"],["Easypaisa","03471786686","M. Ahsan Zubair"],["Easypaisa","03207064398","Muhammad Sabtain"]];
 // Ambassador codes: [code, ambassador, college]. Hard-coded, edit here to add or remove.
 export const AMB=[
 ["ARES-SH-101","Sahrish Hayat","Niazi Medical & Dental College, Sargodha"],
