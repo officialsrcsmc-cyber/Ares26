@@ -152,7 +152,7 @@ const F=(k,label,o,ctl)=>{o=o||{};const er=touched[k]&&E[k];
 ${ctl({id:"af-"+k,"aria-invalid":er?"true":"false","aria-describedby":dd||undefined,onBlur:blur(k)})}
 ${o.hint&&h`<p class="af-hint" id=${"af-h-"+k}>${o.hint}</p>`}${o.cnt}
 ${er&&h`<p class="af-err" id=${"af-e-"+k} role="alert"><${Ic} n="alert" size=${15}/><span>${E[k]}</span></p>`}</div>`};
-const wordCnt=k=>h`<p class=${"af-cnt "+lvl(total,LIM_WORDS)} id=${"af-c-"+k}><span>${wc(f[k])} word${wc(f[k])===1?"":"s"}</span><span>Total ${total} / ${LIM_WORDS}</span></p>`;
+const wordCnt=k=>h`<p class=${"af-cnt "+lvl(total,LIM_WORDS)} id=${"af-c-"+k}><span>${wc(f[k])} word${wc(f[k])===1?"":"s"}</span></p>`;
 
 /* --- deadline banner --- */
 const de=(ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[]);const dl=de[0]||"",iso=de[2];
