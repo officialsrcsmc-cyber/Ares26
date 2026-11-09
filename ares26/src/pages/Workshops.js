@@ -73,6 +73,7 @@ const action=w=>{
   }
   return h`<div class="wk-state bad"><${Ic} n="alert" size=${18}/><span>Your request was not approved for this workshop.</span></div>`;
  }
+ if(w.full)return h`<div class="wk-state bad"><${Ic} n="lock" size=${18}/><span>${w.fullNote||"Maximum occupancy achieved"}</span></div><button class="btn block" disabled>Enrolment closed</button>`;
  if(loading)return h`<button class="btn block" disabled>Loading...</button>`;
  if(gate)return h`<button class="btn block" onClick=${()=>go(gate.to)}>${session?"Enrolment opens after approval":"Log in to enrol"}</button>`;
  if(fee>0){
@@ -86,7 +87,7 @@ ${gate&&h`<div class="wk-banner" role="status"><span class="ab-ico sm"><${Ic} n=
 ${err&&!payFor&&h`<div class="err" role="alert">${err}</div>`}
 ${list.length?h`<div class="g c3">${list.map(w=>{
  const fee=profile?(feeOf(w)):null,when=[wkDate(w.date),w.time].filter(Boolean).join(" · ");
- return h`<div class="card wk-card" key=${w.id}>${w.image&&h`<img src=${w.image} alt=${w.title} loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;margin-bottom:12px"/>`}<h3>${w.title}</h3>
+ return h`<div class=${"card wk-card"+(w.full?" wk-full":"")} key=${w.id}>${w.full&&h`<span class="wk-full-tag">${w.fullNote||"Maximum occupancy achieved"}</span>`}${w.image&&h`<img src=${w.image} alt=${w.title} loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;margin-bottom:12px"/>`}<h3>${w.title}</h3>
  ${(when||w.venue)&&h`<p class="wk-when">${when&&h`<span><${Ic} n="cal" size=${15}/>${when}</span>`}${w.venue&&h`<span><${Ic} n="pin" size=${15}/>${w.venue}</span>`}</p>`}
  <p class="mut" style="white-space:pre-wrap">${w.desc}</p>
  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px">${fee!==null?(feeLabel(fee)&&h`<span class="badge Accepted">Your fee: ${feeLabel(fee)}</span>`):h`${feeLabel(w.feeSmc)&&h`<span class="badge Accepted">SMC: ${feeLabel(w.feeSmc)}</span>`}${feeLabel(w.feeNon)&&h`<span class="badge Pending">Non-SMC: ${feeLabel(w.feeNon)}</span>`}`}</div>

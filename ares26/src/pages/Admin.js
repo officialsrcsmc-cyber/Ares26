@@ -109,6 +109,7 @@ ${w.image&&h`<img src=${w.image} alt="Preview" style="max-width:220px;max-height
 <label>Fee for SMCians (PKR)<input type="text" inputMode="decimal" value=${w.feeSmc} placeholder="0 = free" onInput=${e=>edWk(i,"feeSmc",e.target.value.replace(/[^\d.]/g,""))}/></label>
 <label>Fee for non-SMCians (PKR)<input type="text" inputMode="decimal" value=${w.feeNon} placeholder="e.g. 500" onInput=${e=>edWk(i,"feeNon",e.target.value.replace(/[^\d.]/g,""))}/></label>
 </div>
+<div style="margin-top:12px;padding:12px;border:1px solid var(--line,#ddd);border-radius:10px"><label style="display:flex;gap:10px;align-items:center;cursor:pointer"><input type="checkbox" style="width:auto;margin:0" checked=${!!w.full} onChange=${e=>edWk(i,"full",e.target.checked)}/><span><b>Grey out this workshop (full)</b></span></label>${w.full&&h`<label style="margin-top:10px;display:block">Message shown on the workshop<input value=${w.fullNote==null?"":w.fullNote} placeholder="Maximum occupancy achieved" onInput=${e=>edWk(i,"fullNote",e.target.value)}/></label>`}</div>
 <button class="btn o s dng" style="margin-top:12px" onClick=${()=>delWk(i)}>Remove workshop</button></div>`)}
 <button class="btn o" style="margin-bottom:16px" onClick=${addWk}>+ Add workshop</button><br/>
 <button class="btn" onClick=${saveContent}>Save changes</button></div>`}

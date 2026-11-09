@@ -1,7 +1,7 @@
 import {useState,useEffect,useRef,h,BANK,DISC,SECT,left,Ic,Acc,ABS_FEE,absRef} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
-const FMT=[["Word limit","Max 300 words (excl. title, keywords, author details)"],["Font","Arial or Calibri, size 12"],["Spacing","Single line spacing (1.0)"],["Language","English"],["File format","MS Word — .doc or .docx"]];
+const FMT=[["Word limit","Max 400 words in total across all sections (excl. title, keywords, author details)"],["Font","Arial or Calibri, size 12"],["Spacing","Single line spacing (1.0)"],["Language","English"],["File format","MS Word — .doc or .docx"]];
 const CATS=[["Original Research Studies","Cross-sectional studies; cohort studies (prospective and retrospective); case-control studies; randomized controlled trials (RCTs); other observational and interventional studies; case reports and case series."],
 ["Systematic Reviews & Meta-Analyses","Systematic reviews; meta-analyses; scoping reviews."],
 ["Database & Population-Based Studies","CDC WONDER database studies; Global Burden of Disease (GBD) studies; other large-scale national or international database and registry-based studies."]];
@@ -67,7 +67,7 @@ return h`<li key=${i}><span class="ab-num" aria-hidden="true">${i+1}</span><div 
 </div>`};
 
 /* ---------- Submission form: 4-step flow ---------- */
-const LIM_WORDS=300,MAXA=10,DKEY="ares26_abstract_draft_v2:";
+const LIM_WORDS=400,MAXA=10,DKEY="ares26_abstract_draft_v2:";
 const STEP_NAMES=["Details","Authors","Abstract","Review"];
 const ORD=["First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth"];
 const INIT={title:"",disc:DISC[0],cat:"Oral",Introduction:"",Methodology:"",Results:"",Conclusion:""};

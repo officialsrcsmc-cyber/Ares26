@@ -648,3 +648,5 @@ body::before{z-index:101}
 .wk-fees span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 14px;font-size:.88rem}
 .wk-fees b{margin-right:6px}
 .wk-banner .btn{background:#fff;color:var(--pd);border-color:#fff}
+
+.wk-card{position:relative}.wk-card.wk-full{filter:grayscale(1);opacity:.6}.wk-card.wk-full .wk-act{opacity:1}.wk-full-tag{align-self:flex-start;background:#444;color:#fff;font-size:.78rem;font-weight:600;padding:4px 10px;border-radius:999px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.03em}

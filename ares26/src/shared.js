@@ -42,7 +42,7 @@ team:Array.from({length:10},(_,i)=>["Team Member "+(i+1),"Role / Title"]),
 faqs:[["Who can attend?","Medical and allied health students, faculty and researchers. SMC students and external participants may register."],["Is it in person?","Yes. ARES’26 takes place on campus at Sargodha Medical College."],["How do I pay?","Pay by bank transfer, then upload your proof in step 3 of registration. Your status shows as Pending until the team verifies it."],["What can I submit?","Original research, case reports and reviews, as an oral or poster abstract. Use the structured format on the Abstracts page."],["Will there be workshops?","Yes. Details and enrolment will be posted on the Workshop page."]],
 workshops:[]};
 // Blank template for a new workshop row in the admin Content editor.
-export const BLANK_WORKSHOP={title:"",desc:"",image:"",feeSmc:"",feeNon:"",date:"",time:"",venue:""};
+export const BLANK_WORKSHOP={title:"",desc:"",image:"",feeSmc:"",feeNon:"",date:"",time:"",venue:"",full:false,fullNote:"Maximum occupancy achieved"};
 // Every workshop needs a stable id so enrolments can point at it. New ones get a random id; older ones saved before ids existed get w1, w2... by position.
 export const newWorkshop=()=>({...BLANK_WORKSHOP,id:"w"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)});
 export const withWkIds=l=>(Array.isArray(l)?l:[]).map((w,i)=>w&&w.id?w:{...w,id:"w"+(i+1)});
