@@ -7,7 +7,7 @@ const CATS=[["Original Research Studies","Cross-sectional studies; cohort studie
 ["Database & Population-Based Studies","CDC WONDER database studies; Global Burden of Disease (GBD) studies; other large-scale national or international database and registry-based studies."]];
 const CONTENT=[["Title","Concise and reflective of the research"],["Introduction","Background, rationale and objectives"],["Methodology","Study design, sample, tools and data analysis"],["Results","Key findings, including a numeric/statistical summary"],["Conclusion & recommendations",""],["Keywords","3–5 terms, preferably using MeSH terms"]];
 const PRES=[["Modes of presentation","Oral and Poster"],["Top 3 presentations","Cash prizes"],["Certificates","Awarded to all participants & presenters"],["CME points","For Pre-Conference Workshop participants and scientific-session presenters (oral or poster)"]];
-const STEPS=["Register and upload your fee payment receipt. Abstract submission opens once the team approves your registration.","Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","If your abstract is selected, you will be sent a private payment link. Pay the PKR 500 printing and setup fee and upload your receipt there.","Final PowerPoint presentation / poster due: by 19 Nov 2026."];
+const STEPS=["Register and upload your fee payment receipt. Abstract submission opens once the team approves your registration.","Submit your abstract through the website.","All submissions are peer-reviewed.","Notification of acceptance: by 14 Nov 2026.","If your abstract is selected, you will be sent a private payment link. Pay the PKR 500 printing and setup fee and upload your receipt there.","Final PowerPoint presentation / poster due: by 115 Nov 2026."];
 const POLICY=[["Multiple authorships permitted","You may be listed as an author or co-author on more than one submitted abstract."],["One presentation per person","You may serve as the presenting author for only ONE accepted abstract, whether oral or poster."],["More than one acceptance","If you're the presenting author on more than one accepted abstract, nominate another listed co-author to present the rest — they must complete the required registration."],["Designated presenter","Every abstract names one presenting author, responsible for delivering it and answering questions."]];
 
 
@@ -21,7 +21,7 @@ const mark=(s,re,tag)=>String(s).split(re).map((x,i)=>i%2?h`<${tag||"mark"} clas
 const Sec=({t,id,children})=>h`<section class="ab-sec" aria-labelledby=${id}><h2 class="ab-h" id=${id}>${t}</h2>${children}</section>`;
 
 const Guidelines=({ct})=>{
-const de=ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[],dl=de[0]||"9 Nov",cd=de[2]?left(de[2]):"";
+const de=ct.dates.find(([,t])=>/abstract.*deadline/i.test(t))||[],dl=de[0]||"15 Nov",cd=de[2]?left(de[2]):"";
 const scrollToForm=()=>{const el=document.getElementById("abs-form");if(el)el.scrollIntoView({behavior:"smooth",block:"start"})};
 return h`<div class="ab-page">
 <div class="ab-top">
