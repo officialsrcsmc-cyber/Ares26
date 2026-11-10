@@ -312,6 +312,7 @@ header .hd.w,.hero>.w{max-width:var(--maxw)}
 .hero h1{font:600 clamp(2rem,7vw,3.5rem)/1.1 var(--serif);color:#fff;margin:0 0 18px;max-width:15em;text-wrap:balance}
 .hero p.hero-lead{font-size:1.08rem;line-height:1.7;color:#ddd0ee;max-width:600px;margin:0 0 14px}
 .hero p.hero-when{color:#cdbbe3;margin:0 0 28px}.hero p.hero-when b{color:#fff;font-weight:600}
+.hero-dl{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px}.hero-dl-i{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px}.hero-dl-i span{color:#cdbbe3;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}.hero-dl-i b{color:#fff;font-size:1.05rem;font-weight:700}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px}
 .hero .btn{border-radius:999px;min-height:48px;padding:0 26px;font-weight:600}
 .hero .btn.o{border-color:rgba(255,255,255,.5)}
