@@ -1,5 +1,5 @@
 import HERO from '../assets/hero-building.webp';
-import {useState,useEffect,h,LOGO,BANK,DISC,SECT,DEF,left,NAV,Faq,Ic} from '../shared.js';
+import {useState,useEffect,h,LOGO,BANK,DISC,SECT,DEF,left,NAV,Faq,Ic,REG_OPEN,ABS_OPEN} from '../shared.js';
 
 const Head=({t,id,sub})=>h`<div class="hm-head"><h2 class="ab-h" id=${id}>${t}</h2>${sub&&h`<p class="mut">${sub}</p>`}</div>`;
 const initials=n=>n.split(" ").map(x=>x[0]).join("").slice(0,2);
@@ -29,12 +29,12 @@ export default function Home(P){const{ct,go}=P;return h`<div>
 <p class="hero-lead">Sargodha Medical College’s first international research conference. Present your work, learn hands-on, and meet researchers shaping medicine.</p>
 <p class="hero-when"><b>Third week of November 2026</b> · In person at Sargodha Medical College</p>
 <div class="hero-dl">${[[/registration closes/i,"Registration deadline"],[/abstract.*deadline/i,"Abstract deadline"]].map(([re,lbl])=>{const e=ct.dates.find(([,t])=>re.test(t));return e&&h`<div class="hero-dl-i" key=${lbl}><span>${lbl}</span><b>${e[0]} 2026</b></div>`})}</div>
-<div class="hero-cta"><button class="btn" onClick=${()=>go("register")}>Register now</button> <button class="btn o" onClick=${()=>go("abstracts")}>Submit abstract</button></div></div>
+<div class="hero-cta">${REG_OPEN?h`<button class="btn" onClick=${()=>go("register")}>Register now</button>`:h`<button class="btn" disabled>Registration closed</button>`} ${ABS_OPEN?h`<button class="btn o" onClick=${()=>go("abstracts")}>Submit abstract</button>`:h`<button class="btn o" disabled>Abstracts closed</button>`}</div></div>
 <div class="lg"><img src=${LOGO} alt="ARES’26 logo"/></div></div></section>
 
 <section class="sec w" aria-labelledby="hm-soon"><${Head} t="What’s coming" id="hm-soon"/><div class="g c3">
-<div class="card feat"><span class="ab-ico"><${Ic} n="users"/></span><h3>Conference registration</h3><p class="mut">Open to students, faculty and researchers. Includes conference access and materials. Fee announced with opening of registration.</p><button class="btn o s" onClick=${()=>go("register")}>Register</button></div>
-<div class="card feat"><span class="ab-ico"><${Ic} n="file"/></span><h3>Abstract submission</h3><p class="mut">Submit a structured abstract for oral or poster presentation. Peer reviewed; decisions appear on your dashboard.</p><button class="btn o s" onClick=${()=>go("abstracts")}>Submit</button></div>
+<div class="card feat"><span class="ab-ico"><${Ic} n="users"/></span><h3>Conference registration</h3><p class="mut">Open to students, faculty and researchers. Includes conference access and materials. Registration is now closed.</p><button class="btn o s" disabled>Closed</button></div>
+<div class="card feat"><span class="ab-ico"><${Ic} n="file"/></span><h3>Abstract submission</h3><p class="mut">Submit a structured abstract for oral or poster presentation. Submissions are now closed. Decisions appear on your dashboard.</p><button class="btn o s" disabled>Closed</button></div>
 <div class="card feat"><span class="ab-ico"><${Ic} n="tool"/></span><h3>Workshops</h3><p class="mut">Hands-on sessions led by invited faculty. Capacity is limited. Schedule coming soon.</p><button class="btn o s" onClick=${()=>go("workshops")}>See status</button></div></div></section>
 
 <section class="sec w" style="padding-top:0" aria-labelledby="hm-cal"><${Head} t="Mark your calendar" id="hm-cal"/><div class="g c5">${ct.dates.filter(([,,iso])=>left(iso)!=="PASSED").map(([d,t,iso],i)=>h`<div class="card k" key=${t}><div class="dt"><b>${d}</b><span>${left(iso)}</span></div><h3>${t}</h3></div>`)}</div></section>

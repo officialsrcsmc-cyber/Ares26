@@ -5,6 +5,10 @@ import LOGO_LIGHT from './assets/logo-onwhite.webp';
 export{useState,useEffect,useRef,LOGO,LOGO_LIGHT};
 const fixProps=p=>{if(!p)return p;p={...p};if(typeof p.style==="string"){p.style=Object.fromEntries(p.style.split(";").filter(x=>x.includes(":")).map(x=>{const i=x.indexOf(":");return[x.slice(0,i).trim().replace(/-([a-z])/g,(m,c)=>c.toUpperCase()),x.slice(i+1).trim()]}))}if(p.class!=null){p.className=p.class;delete p.class}return p};
 export const h=htm.bind((t,p,...c)=>React.createElement(t,fixProps(p),...c));
+// Master switch: set to true to reopen new registrations (also run supabase/open_registration.sql).
+export const REG_OPEN=false;
+// Master switch for new abstract submissions: set to true to reopen (also run supabase/open_abstracts.sql).
+export const ABS_OPEN=false;
 export const BANK="Bank, account title and account number will be announced by the organizing committee.";
 export const FEES=[["SMC Students",500,"smc"],["Non SMC",1200,"non"],["With Ambassador Code",800,"amb"],["Post Graduate",1000,"pg"]];
 export const ABS_FEE=500;

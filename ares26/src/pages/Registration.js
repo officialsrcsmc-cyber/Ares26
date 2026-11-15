@@ -1,4 +1,4 @@
-import {useState,useEffect,h,phoneClean,BANK,DISC,SECT,left} from '../shared.js';
+import {useState,useEffect,h,phoneClean,BANK,DISC,SECT,left,REG_OPEN} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 export default function Registration(P){
@@ -28,6 +28,7 @@ const submit=async()=>{
  if(data.session)return go("dashboard");
  setSent(true)};
 
+if(!REG_OPEN)return h`<div class="auth wide"><h2>Registration closed</h2><p class="sub">New registrations for ARES’26 are now closed.</p><div class="panel"><p style="margin:0 0 12px">Thank you for your interest. Already registered? Log in to check your status, upload payment proof or manage your abstracts and workshops.</p><button class="btn block" onClick=${()=>go("login")}>Log in</button><p class="fine" style="margin-top:12px">Questions? Email official.srcsmc@gmail.com.</p></div></div>`;
 if(sent)return h`<div class="auth wide"><h2>Check your email</h2><p class="sub">One more step to activate your account.</p><div class="panel"><p style="margin:0 0 12px">We sent a confirmation link to <b>${f.email}</b>. Open it to activate your account, then log in to upload your payment proof and finish your registration.</p><p class="fine">Nothing there after a few minutes? Check your spam folder.</p><button class="btn block" onClick=${()=>go("login")}>Go to log in</button></div></div>`;
 
 return h`<div class="auth wide"><h2>Registration</h2><p class="sub">Step ${s} of ${total}${s==1?": your account":s==2&&smc?": SMC verification":s==acad?": academic details":""}</p><div class="st">${Array.from({length:total},(_,i)=>i+1).map(i=>h`<i class=${i<=s?"on":""}/>`)}</div>

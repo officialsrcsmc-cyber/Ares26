@@ -1,4 +1,4 @@
-import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq,Ic,withWkIds,absFeeRef} from './shared.js';
+import {useState,useEffect,h,LOGO,LOGO_LIGHT,DEF,NAV,Faq,Ic,withWkIds,absFeeRef,REG_OPEN,ABS_OPEN} from './shared.js';
 import {sb} from './supabase.js';
 
 import Home from './pages/Home.js';
@@ -59,13 +59,13 @@ const P={go,sb,session,profile,refresh,logout,abs,ct,setC,enr,fref},Page=PAGES[p
 const nav=(k,l,mob)=>h`<a key=${k} href=${"#"+k} class=${pg==k?"on":""} aria-current=${pg==k?"page":undefined} onClick=${e=>{e.preventDefault();go(k)}}>${l}</a>`;
 const adm=profile&&profile.is_admin;
 return h`<div><header class=${pg==="abstracts"?"hd-static":""}><div class="w hd"><a href="#home" class="brand" aria-label="ARES’26 home" onClick=${e=>{e.preventDefault();go("home")}}><img src=${LOGO_LIGHT} alt="ARES’26"/></a><div class="sp"/><nav aria-label="Main">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>
-<a href="#register" class="btn s reg" onClick=${e=>{e.preventDefault();go("register")}}>Register now</a><button type="button" class="burger bg" aria-label=${menu?"Close menu":"Open menu"} aria-expanded=${menu} aria-controls="mobile-menu" onClick=${()=>setMenu(!menu)}><span class=${"bars"+(menu?" x":"")}><i/><i/><i/></span></button></div>
+${REG_OPEN?h`<a href="#register" class="btn s reg" onClick=${e=>{e.preventDefault();go("register")}}>Register now</a>`:h`<a href="#login" class="btn s reg" onClick=${e=>{e.preventDefault();go("login")}}>Log in</a>`}<button type="button" class="burger bg" aria-label=${menu?"Close menu":"Open menu"} aria-expanded=${menu} aria-controls="mobile-menu" onClick=${()=>setMenu(!menu)}><span class=${"bars"+(menu?" x":"")}><i/><i/><i/></span></button></div>
 ${menu&&h`<nav class="mn" id="mobile-menu" aria-label="Mobile">${NAV.map(([k,l])=>nav(k,l))}${adm&&nav("ares-admin","Admin")}</nav>`}</header>
 ${sb?h`<${Page} ...${P}/>`:h`<${Setup}/>`}
 <footer><div class="w ft">
 <div class="ft-col ft-brand"><img src=${LOGO} alt="ARES’26" class="ft-logo"/><h3>ARES'26</h3><p>Academic Research & Excellence Symposium, organised by the Student Research Council (SRC) at Sargodha Medical College.</p></div>
 <div class="ft-col"><h3>Contact</h3><p><${Ic} n="mail" size=${16}/><span>Email: official.srcsmc@gmail.com</span></p><p><${Ic} n="phone" size=${16}/><span>Phone: (048) 9232004</span></p><p><${Ic} n="pin" size=${16}/><span>Address: 2P3F+H7J, Faisalabad Rd, Sargodha</span></p></div>
-<div class="ft-col"><h3>Quick Links</h3><p><a href="#home" onClick=${e=>{e.preventDefault();go("home")}}>Home</a></p><p><a href="#register" onClick=${e=>{e.preventDefault();go("register")}}>Register</a></p><p><a href="#abstracts" onClick=${e=>{e.preventDefault();go("abstracts")}}>Submit abstract</a></p><p><a href="#terms" onClick=${e=>{e.preventDefault();go("terms")}}>Terms of use</a></p><p><a href="#conduct" onClick=${e=>{e.preventDefault();go("conduct")}}>Code of conduct</a></p><p><a href="/sitemap">Sitemap</a></p><p><a href="/privacy">Privacy Policy</a></p><p><button type="button" class="linkbtn" data-cookie-settings>Cookie settings</button></p><p><a href="/">← Back to SRC</a></p></div>
+<div class="ft-col"><h3>Quick Links</h3><p><a href="#home" onClick=${e=>{e.preventDefault();go("home")}}>Home</a></p>${REG_OPEN&&h`<p><a href="#register" onClick=${e=>{e.preventDefault();go("register")}}>Register</a></p>`}${ABS_OPEN&&h`<p><a href="#abstracts" onClick=${e=>{e.preventDefault();go("abstracts")}}>Submit abstract</a></p>`}<p><a href="#terms" onClick=${e=>{e.preventDefault();go("terms")}}>Terms of use</a></p><p><a href="#conduct" onClick=${e=>{e.preventDefault();go("conduct")}}>Code of conduct</a></p><p><a href="/sitemap">Sitemap</a></p><p><a href="/privacy">Privacy Policy</a></p><p><button type="button" class="linkbtn" data-cookie-settings>Cookie settings</button></p><p><a href="/">← Back to SRC</a></p></div>
 </div>
 <div class="w ft-bottom">© 2026 SRC – Sargodha Medical College. All rights reserved.</div>
 <div class="w ft-credit"><a href="https://hadbie-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer">Made by <b>Hassan Farooq</b> ↗</a></div>

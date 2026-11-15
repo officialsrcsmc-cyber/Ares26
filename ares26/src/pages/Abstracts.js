@@ -1,4 +1,4 @@
-import {useState,useEffect,useRef,h,BANK,DISC,SECT,left,Ic,Acc,ABS_FEE,absRef} from '../shared.js';
+import {useState,useEffect,useRef,h,BANK,DISC,SECT,left,Ic,Acc,ABS_FEE,absRef,ABS_OPEN} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 
 const FMT=[["Word limit","Max 400 words in total across all sections (excl. title, keywords, author details)"],["Font","Arial or Calibri, size 12"],["Spacing","Single line spacing (1.0)"],["Language","English"],["File format","MS Word — .doc or .docx"]];
@@ -28,7 +28,7 @@ return h`<div class="ab-page">
 <p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>ABSTRACT SUBMISSIONS</span></p>
 <h1 class="ab-title">Abstract Submission Guidelines</h1>
 <p class="ab-meta"><span>Sargodha Medical College, Sargodha – Pakistan</span><span class="ab-dot" aria-hidden="true">·</span><span>ARES’26</span><span class="ab-dot" aria-hidden="true">·</span><span>Saturday, 21st November 2026</span></p>
-<button type="button" class="btn ab-cta" onClick=${scrollToForm}>Submit your abstract <${Ic} n="down" size=${18}/></button>
+${ABS_OPEN?h`<button type="button" class="btn ab-cta" onClick=${scrollToForm}>Submit your abstract <${Ic} n="down" size=${18}/></button>`:h`<button type="button" class="btn ab-cta" disabled>Submissions closed</button>`}
 </div>
 
 <div class="ab-key-cards">
@@ -129,6 +129,7 @@ const saveNow=()=>{if(write())setSaved("saved")};
 /* --- submit --- */
 const submit=async()=>{
  if(busy)return;
+ if(!ABS_OPEN){setErr("Abstract submission is closed.");return}
  if(!profile||profile.status!=="Approved"){setErr("Your registration must be approved before you can submit an abstract.");return}
  const badStep=[1,2,3].find(stepBad);
  if(badStep){touch([1,2,3].flatMap(keysFor));setErr("Some required details are missing or need fixing. We’ve taken you to the first one.");setStep(badStep);toTop();const k=keysFor(badStep).find(k=>E[k]);if(k)focusKey(k);return}
@@ -169,7 +170,8 @@ if(session){
  else if(profile.status!=="Approved")gate={msg:profile.proof_path?"Your registration is awaiting approval. You can submit an abstract as soon as it is approved.":"Complete your registration payment first. Abstract submission opens once your registration is approved.",btn:"Go to dashboard",to:"dashboard"};
 }
 let body;
-if(session===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></div>`;
+if(!ABS_OPEN)body=h`<div class="auth"><div class="wk-banner" role="status"><span class="ab-ico sm"><${Ic} n="lock"/></span><div class="wk-bn-body"><h2>Abstract submission closed</h2><p>Abstract submission for ARES’26 is now closed and no new abstracts are being accepted. Already submitted? Track your abstract on your dashboard.</p><button class="btn s" onClick=${()=>go(session?"dashboard":"login")}>${session?"Go to dashboard":"Log in"}</button></div></div></div>`;
+else if(session===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></div>`;
 else if(!session)body=h`<div class="auth"><h2>Abstract submission</h2><p class="sub">You need to be logged in to submit an abstract.</p><div class="panel"><button class="btn block" onClick=${()=>go("login")}>Log in</button></div></div>`;
 else if(profile===undefined)body=h`<div class="w sec"><p class="mut">Loading...</p></div>`;
 else if(gate&&!done)body=h`<div class="auth"><div class="wk-banner" role="status"><span class="ab-ico sm"><${Ic} n="lock"/></span><div class="wk-bn-body"><h2>Account verification required</h2><p>Your account must be verified and your registration fee approved before you can submit an abstract. ${gate.msg}</p><button class="btn s" onClick=${()=>go(gate.to)}>${gate.btn}</button></div></div></div>`;

@@ -1,4 +1,4 @@
-import {useState,h} from '../shared.js';
+import {useState,h,REG_OPEN} from '../shared.js';
 import {sb} from '../supabase.js';
 
 export default function Login(P){
@@ -18,5 +18,5 @@ return h`<div class="auth"><h2>Log in</h2><p class="sub">Access your registratio
 ${er&&h`<div class="err" role="alert">${er}</div>`}${info&&h`<div class="ok" role="status">${info}</div>`}
 <button class="btn block" disabled=${busy} onClick=${ok}>${busy?"Logging in...":"Log in"}</button>
 <div class="linkrow"><button type="button" class="lk" onClick=${forgot}>Forgot password?</button></div>
-<p class="alt">New here? <a href="#register" onClick=${x=>{x.preventDefault();go("register")}}>Create an account</a></p>
+${REG_OPEN&&h`<p class="alt">New here? <a href="#register" onClick=${x=>{x.preventDefault();go("register")}}>Create an account</a></p>`}
 </div></div>`}
