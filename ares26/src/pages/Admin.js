@@ -1,4 +1,4 @@
-import {AMB,ambFind,waNum,waPretty,useState,useEffect,h,BANK,DISC,SECT,left,newWorkshop,wkDate,ABS_FEE,absRef,absLink} from '../shared.js';
+import {AMB,ambFind,waNum,waPretty,useState,useEffect,h,BANK,DISC,SECT,left,newWorkshop,wkDate,ABS_FEE,absRef,absLink,EXTRA_ABS} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 import AdminFees from './AdminFees.js';
 
@@ -14,7 +14,7 @@ const isAdmin=!!(profile&&profile.is_admin);
 
 const load=async()=>{
  const a=await sb.from("profiles").select("*").order("created_at",{ascending:false});if(a.error)setMsg(a.error.message);else setRegs(a.data||[]);
- const b=await sb.from("abstracts").select("*, profiles(first_name,last_name,email,phone)").order("created_at",{ascending:false});if(b.error)setMsg(b.error.message);else setAbss(b.data||[]);
+ const b=await sb.from("abstracts").select("*, profiles(first_name,last_name,email,phone)").order("created_at",{ascending:false});if(b.error)setMsg(b.error.message);else setAbss([...(b.data||[]),...EXTRA_ABS]);
  const c=await sb.from("workshop_enrollments").select("*, profiles(first_name,last_name,email,phone,institution,programme,smc,uhs_id,status)").order("created_at",{ascending:false});if(c.error)setMsg(c.error.message);else setEnrs(c.data||[])};
 useEffect(()=>{if(isAdmin)load()},[isAdmin]);
 useEffect(()=>{setDraft(ct)},[ct]);
