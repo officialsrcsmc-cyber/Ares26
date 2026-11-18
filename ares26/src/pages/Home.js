@@ -27,7 +27,7 @@ export default function Home(P){const{ct,go}=P;return h`<div>
 <p class="hero-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>SARGODHA MEDICAL COLLEGE</span></p>
 <h1>ARES’26: Academic Research & Excellence Symposium</h1>
 <p class="hero-lead">Sargodha Medical College’s first international research conference. Present your work, learn hands-on, and meet researchers shaping medicine.</p>
-<p class="hero-when"><b>Third week of November 2026</b> · In person at Sargodha Medical College</p>
+<p class="hero-when"><b>30 November 2026</b> · In person at Sargodha Medical College</p>
 <div class="hero-dl">${[[/registration closes/i,"Registration deadline"],[/abstract.*deadline/i,"Abstract deadline"]].map(([re,lbl])=>{const e=ct.dates.find(([,t])=>re.test(t));return e&&h`<div class="hero-dl-i" key=${lbl}><span>${lbl}</span><b>${e[0]} 2026</b></div>`})}</div>
 <div class="hero-cta">${REG_OPEN?h`<button class="btn" onClick=${()=>go("register")}>Register now</button>`:h`<button class="btn" disabled>Registration closed</button>`} ${ABS_OPEN?h`<button class="btn o" onClick=${()=>go("abstracts")}>Submit abstract</button>`:h`<button class="btn o" disabled>Abstracts closed</button>`}</div></div>
 <div class="lg"><img src=${LOGO} alt="ARES’26 logo"/></div></div></section>

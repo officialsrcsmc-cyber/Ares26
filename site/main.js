@@ -21,7 +21,7 @@ var burger=document.getElementById('burger'),mnav=document.getElementById('mnav'
   }
 
   // ARES'26 countdown
-  var cd=document.getElementById('countdown'),d=daysUntil('2026-11-21');
+  var cd=document.getElementById('countdown'),d=daysUntil('2026-11-30');
   if(d>1){cd.textContent='Starts in '+d+' days';cd.hidden=false}
   else if(d===1){cd.textContent='Starts tomorrow';cd.hidden=false}
   else if(d===0){cd.textContent='Happening today';cd.hidden=false}

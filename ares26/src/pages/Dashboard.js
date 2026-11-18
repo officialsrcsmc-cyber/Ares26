@@ -9,7 +9,7 @@ if(!session)return h`<div class="auth"><h2>Dashboard</h2><p class="sub">Log in t
 if(!profile)return h`<div class="auth"><h2>Dashboard</h2><p class="sub">We could not load your registration. Try refreshing the page, or log out and back in.</p><div class="panel"><button class="btn o block" onClick=${logout}>Log out</button></div></div>`;
 const set=k=>e=>setF({...f,[k]:e.target.value});
 const I=(l,k,t="text")=>h`<label>${l}<input type=${t} value=${f[k]||""} onInput=${set(k)}/></label>`;
-const ev=(ct.dates||[]).slice(-1)[0]||["Nov 21","ARES’26 main event","2026-11-21"];
+const ev=(ct.dates||[]).slice(-1)[0]||["Nov 30","ARES’26 main event","2026-11-30"];
 const evDate=new Date(ev[2]+"T00:00:00");
 const evText=isNaN(evDate)?ev[0]:evDate.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
 const days=isNaN(evDate)?null:Math.ceil((evDate-new Date())/864e5);

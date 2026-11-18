@@ -27,12 +27,12 @@ return h`<div class="ab-page">
 <div class="ab-top">
 <p class="ab-eyebrow"><span>ARES’26</span><i aria-hidden="true"></i><span>ABSTRACT SUBMISSIONS</span></p>
 <h1 class="ab-title">Abstract Submission Guidelines</h1>
-<p class="ab-meta"><span>Sargodha Medical College, Sargodha – Pakistan</span><span class="ab-dot" aria-hidden="true">·</span><span>ARES’26</span><span class="ab-dot" aria-hidden="true">·</span><span>Saturday, 21st November 2026</span></p>
+<p class="ab-meta"><span>Sargodha Medical College, Sargodha – Pakistan</span><span class="ab-dot" aria-hidden="true">·</span><span>ARES’26</span><span class="ab-dot" aria-hidden="true">·</span><span>Monday, 30th November 2026</span></p>
 ${ABS_OPEN?h`<button type="button" class="btn ab-cta" onClick=${scrollToForm}>Submit your abstract <${Ic} n="down" size=${18}/></button>`:h`<button type="button" class="btn ab-cta" disabled>Submissions closed</button>`}
 </div>
 
 <div class="ab-key-cards">
-<div class="ab-kc"><span class="ab-ico"><${Ic} n="cal"/></span><div><p class="ab-lbl">Conference date</p><p class="ab-val">Sat, 21 Nov 2026</p></div></div>
+<div class="ab-kc"><span class="ab-ico"><${Ic} n="cal"/></span><div><p class="ab-lbl">Conference date</p><p class="ab-val">Mon, 30 Nov 2026</p></div></div>
 <div class="ab-kc"><span class="ab-ico"><${Ic} n="pin"/></span><div><p class="ab-lbl">Mode</p><p class="ab-val">In-person</p></div></div>
 <div class="ab-kc ab-deadline"><span class="ab-ico"><${Ic} n="clock"/></span><div><p class="ab-lbl">Abstract deadline</p><p class="ab-val">${dl} 2026</p>${cd&&h`<span class="ab-pill">${cd.charAt(0)+cd.slice(1).toLowerCase()}</span>`}</div></div>
 </div>
