@@ -1,4 +1,4 @@
-import {AMB,ambFind,waNum,waPretty,useState,useEffect,h,BANK,DISC,SECT,left,newWorkshop,wkDate,ABS_FEE,absRef,absLink,EXTRA_ABS} from '../shared.js';
+import {ABS_LABELS,absLabel,absFromLabel,AMB,ambFind,waNum,waPretty,useState,useEffect,h,BANK,DISC,SECT,left,newWorkshop,wkDate,ABS_FEE,absRef,absLink,EXTRA_ABS} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
 import AdminFees from './AdminFees.js';
 
@@ -27,6 +27,8 @@ if(!isAdmin)return h`<div class="w sec" style="max-width:480px"><h2>Not authoriz
 const flash=t=>{setMsg(t);setTimeout(()=>setMsg(""),4000)};
 const setStatus=async(table,id,status)=>{const{error}=await sb.from(table).update({status}).eq("id",id);if(error)return flash(error.message);
  table==="profiles"?setRegs(regs.map(r=>r.id==id?{...r,status}:r)):setAbss(abss.map(r=>r.id==id?{...r,status}:r))};
+const setAbs=async(a,label)=>{const patch=absFromLabel(label);const{error}=await sb.from("abstracts").update(patch).eq("id",a.id);if(error)return flash(error.message);
+ setAbss(abss.map(r=>r.id==a.id?{...r,...patch}:r))};
 const setEnrStatus=async(id,status)=>{const{error}=await sb.from("workshop_enrollments").update({status}).eq("id",id);if(error)return flash(error.message);setEnrs(enrs.map(r=>r.id==id?{...r,status}:r))};
 const setAdmin=async(u,on)=>{const nm=(u.first_name||"")+" "+(u.last_name||"");
  if(!window.confirm((on?"Make ":"Remove admin access from ")+nm.trim()+(on?" an admin? They will be able to review payments, abstracts and manage people.":"?")))return;
@@ -48,7 +50,7 @@ const saveContent=async()=>{const{error}=await sb.from("site_content").upsert({i
 const Sel=(v,fn,o)=>h`<select value=${v} onChange=${e=>fn(e.target.value)} style="width:auto">${o.map(x=>h`<option key=${x}>${x}</option>`)}</select>`;
 const day=d=>d?new Date(d).toLocaleString():"";
 const cnt=(arr,s)=>arr.filter(x=>x.status===s).length;
-const absShown=abss.filter(a=>sf==="All"||a.status===sf);
+const absShown=abss.filter(a=>sf==="All"||(sf==="Accepted (all)"?a.status==="Accepted":absLabel(a)===sf));
 const shown=regs.filter(r=>(sf==="All"||r.status===sf)&&(!q||(r.first_name+" "+r.last_name+" "+r.email+" "+(r.tx_id||"")+" "+(r.uhs_id||"")+" "+(r.phone||"")).toLowerCase().includes(q.toLowerCase())));
 
 const enrShown=enrs.filter(r=>(sf==="All"||r.status===sf)&&(wkf==="All"||r.workshop_id===wkf)&&(!q||(((r.profiles?r.profiles.first_name+" "+r.profiles.last_name+" "+r.profiles.email+" "+(r.profiles.uhs_id||""):"")+" "+r.workshop_title).toLowerCase().includes(q.toLowerCase()))));
@@ -61,13 +63,13 @@ const exportWa=()=>download("ares26-whatsapp-list.csv",[["Name","WhatsApp number
 const exportVcf=()=>{const v=waList.map(r=>{const n=((r.first_name||"")+" "+(r.last_name||"")).trim();return"BEGIN:VCARD\r\nVERSION:3.0\r\nFN:ARES26 "+n.replace(/[,;\r\n]/g," ")+"\r\nTEL;TYPE=CELL:+"+waNum(r.phone)+"\r\nEND:VCARD"}).join("\r\n");
  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([v],{type:"text/vcard;charset=utf-8"}));a.download="ares26-whatsapp-contacts.vcf";document.body.appendChild(a);a.click();a.remove()};
 const exportAbs=()=>download("ares26-abstracts.csv",[["Submitted at","Author","Email","Title","Discipline","Category","Introduction","Methodology","Results","Conclusion","Authors","File uploaded","Status","Ref no","Fee status","Fee tx ID"],
- ...abss.map(a=>[a.created_at,a.profiles?a.profiles.first_name+" "+a.profiles.last_name:"",a.profiles?a.profiles.email:"",a.title,a.discipline,a.category,...SECT.map(s=>a.body[s]),(a.body.authors||[]).map(x=>x.name+(x.presenting?" [PRESENTING]":"")+(x.email?" <"+x.email+">":"")+" ("+x.affiliation+")").join("; "),a.file_path?"Yes":"No",a.status,absRef(a.ref_no),a.fee_status,a.fee_tx_id||""])]);
+ ...abss.map(a=>[a.created_at,a.profiles?a.profiles.first_name+" "+a.profiles.last_name:"",a.profiles?a.profiles.email:"",a.title,a.discipline,a.category,...SECT.map(s=>a.body[s]),(a.body.authors||[]).map(x=>x.name+(x.presenting?" [PRESENTING]":"")+(x.email?" <"+x.email+">":"")+" ("+x.affiliation+")").join("; "),a.file_path?"Yes":"No",absLabel(a),absRef(a.ref_no),a.fee_status,a.fee_tx_id||""])]);
 
 return h`<div class="w sec"><div style="display:flex;justify-content:space-between"><h2>Admin panel</h2><button class="btn o s" onClick=${logout}>Sign out</button></div>
 ${msg&&h`<div class="ok">${msg}</div>`}
 <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">${[["reg","Registrations"],["abs","Abstracts"],["fee","Abstract fees"+(abss.filter(x=>x.status==="Accepted"&&x.fee_status==="Pending").length?" ("+abss.filter(x=>x.status==="Accepted"&&x.fee_status==="Pending").length+")":"")],["wk","Workshop approvals"+(cnt(enrs,"Pending")?" ("+cnt(enrs,"Pending")+")":"")],["amb","Ambassadors"],["ct","Content"],["csv","Export"]].map(([k,l])=>h`<button key=${k} class=${"btn s"+(tab==k?"":" o")} onClick=${()=>{setT(k);setSf("All");setQ("");setWkf("All")}}>${l}</button>`)}<button class="btn o s" onClick=${load}>Refresh</button></div>
-<div class="g c5" style="margin-bottom:16px">${[["Registrations",regs.length],["Pending",cnt(regs,"Pending")],["Approved",cnt(regs,"Approved")],["Abstracts",abss.length],["Awaiting review",cnt(abss,"Submitted")+cnt(abss,"Under Review")],["Accepted",cnt(abss,"Accepted")],["Workshop requests",cnt(enrs,"Pending")+" pending"]].map(([l,n])=>h`<div class="card" key=${l} style="padding:12px"><b style="font-size:1.4rem">${n}</b><div class="mut" style="font-size:.8rem">${l}</div></div>`)}</div>
-${(tab=="reg"||tab=="abs"||tab=="wk")&&h`<label style="max-width:240px">Filter by status<select value=${sf} onChange=${e=>setSf(e.target.value)}>${["All"].concat(tab!="abs"?["Pending","Approved","Rejected"]:["Submitted","Under Review","Accepted","Rejected"]).map(x=>h`<option key=${x}>${x}</option>`)}</select></label>`}
+<div class="g c5" style="margin-bottom:16px">${[["Registrations",regs.length],["Pending",cnt(regs,"Pending")],["Approved",cnt(regs,"Approved")],["Abstracts",abss.length],["Awaiting review",cnt(abss,"Submitted")+cnt(abss,"Under Review")],["Accepted - Oral",abss.filter(x=>absLabel(x)==="Accepted - Oral Presentation").length],["Accepted - Poster",abss.filter(x=>absLabel(x)==="Accepted - Poster Presentation").length],["Workshop requests",cnt(enrs,"Pending")+" pending"]].map(([l,n])=>h`<div class="card" key=${l} style="padding:12px"><b style="font-size:1.4rem">${n}</b><div class="mut" style="font-size:.8rem">${l}</div></div>`)}</div>
+${(tab=="reg"||tab=="abs"||tab=="wk")&&h`<label style="max-width:240px">Filter by status<select value=${sf} onChange=${e=>setSf(e.target.value)}>${["All"].concat(tab!="abs"?["Pending","Approved","Rejected"]:["Submitted","Under Review","Accepted (all)","Accepted - Oral Presentation","Accepted - Poster Presentation","Rejected"]).map(x=>h`<option key=${x}>${x}</option>`)}</select></label>`}
 ${tab=="reg"&&h`<div><input placeholder="Search name, email, UHS/SMC ID or transaction ID" value=${q} onInput=${e=>setQ(e.target.value)} style="margin-bottom:12px"/>
 <div class="ov"><table><tr><th>Name</th><th>WhatsApp</th><th>UHS / SMC ID</th><th>Payment</th><th>Status</th><th>Manage</th></tr>${shown.map(u=>h`<tr key=${u.id}><td>${u.first_name} ${u.last_name}<br/><span class="mut">${u.email}</span><br/><span class="mut">${u.institution} · ${u.programme}</span></td>
 <td>${u.phone?h`<b>${waPretty(u.phone)||u.phone}</b><br/><a href=${"https://wa.me/"+waNum(u.phone)} target="_blank" rel="noopener noreferrer">Open chat</a>`:h`<span class="mut">Not provided</span>`}</td>
@@ -78,10 +80,11 @@ ${tab=="reg"&&h`<div><input placeholder="Search name, email, UHS/SMC ID or trans
 ${tab=="abs"&&h`<div>${absShown.map(a=>h`<div class="card" key=${a.id} style="margin-bottom:10px"><b>${a.title}</b><div class="mut" style="font-size:.85rem">${a.profiles?a.profiles.first_name+" "+a.profiles.last_name+" · "+a.profiles.email:""}<br/>${a.discipline} · ${a.category}</div>${(a.body.authors||[]).length>0&&h`<div style="margin:8px 0;font-size:.9rem"><b>Authors:</b><ol style="margin:4px 0 0;padding-left:20px">${a.body.authors.map((x,i)=>h`<li key=${i}>${x.name}${x.presenting&&h`<b> (presenting)</b>`} · ${x.email?h`<a href=${"mailto:"+x.email}>${x.email}</a>`:h`<span class="mut">no email</span>`} · <span class="mut">${x.affiliation}</span></li>`)}</ol></div>`}${SECT.map(s=>h`<p key=${s} style="margin:6px 0;font-size:.9rem"><b>${s}:</b> ${a.body[s]}</p>`)}
 ${a.file_path&&(links["a"+a.id]?h`<p><a href=${links["a"+a.id]} target="_blank" rel="noopener">Open attached file</a></p>`:h`<p><a onClick=${()=>open("a"+a.id,"abstract-files",a.file_path)}>View attached file</a></p>`)}
 ${a.status==="Accepted"&&h`<p class="mut" style="margin:10px 0 0;font-size:.88rem">${absRef(a.ref_no)} · Fee: <b>${a.fee_link_at?a.fee_status:"link not generated"}</b>. Manage it in the <a onClick=${()=>setT("fee")}>Abstract fees</a> tab.</p>`}
-<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><span class=${"badge "+a.status.replace(/ /g,"")}>${a.status}</span>
-<button class="btn s" disabled=${a.status==="Accepted"} onClick=${()=>setStatus("abstracts",a.id,"Accepted")}>Accept</button>
-<button class="btn o s dng" disabled=${a.status==="Rejected"} onClick=${()=>setStatus("abstracts",a.id,"Rejected")}>Reject</button>
-${Sel(a.status,v=>setStatus("abstracts",a.id,v),["Submitted","Under Review","Accepted","Rejected"])}</div></div>`)}${!abss.length&&h`<p class="mut">No abstracts yet.</p>`}</div>`}
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><span class=${"badge "+a.status.replace(/ /g,"")}>${absLabel(a)}</span>
+<button class="btn s" disabled=${absLabel(a)==="Accepted - Oral Presentation"} onClick=${()=>setAbs(a,"Accepted - Oral Presentation")}>Accept - Oral</button>
+<button class="btn s" disabled=${absLabel(a)==="Accepted - Poster Presentation"} onClick=${()=>setAbs(a,"Accepted - Poster Presentation")}>Accept - Poster</button>
+<button class="btn o s dng" disabled=${a.status==="Rejected"} onClick=${()=>setAbs(a,"Rejected")}>Reject</button>
+${Sel(absLabel(a),v=>setAbs(a,v),ABS_LABELS)}</div></div>`)}${!abss.length&&h`<p class="mut">No abstracts yet.</p>`}</div>`}
 ${tab=="fee"&&h`<${AdminFees} abss=${abss} setAbss=${setAbss} flash=${flash} links=${links} open=${open}/>`}
 ${tab=="wk"&&h`<div><p class="mut">Participants can only request a workshop once their registration is Approved. Approve a request to issue their ticket on the dashboard.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px"><label style="max-width:260px">Workshop<select value=${wkf} onChange=${e=>setWkf(e.target.value)}><option value="All">All workshops</option>${(ct.workshops||[]).map(w=>h`<option key=${w.id} value=${w.id}>${w.title||"Untitled"}</option>`)}</select></label>
