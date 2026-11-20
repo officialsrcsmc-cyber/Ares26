@@ -1,5 +1,6 @@
 import {absLabel,useState,useEffect,h,num,LOGO,BANK,FEES,ACCTS,Ic,ambFind,DISC,SECT,left,wkDate,ABS_FEE,absRef,absSlug,ABS_OPEN} from '../shared.js';
 import {sb,upload,signed,MAX_FILE} from '../supabase.js';
+import {AbstractFeeForm} from './AbstractFee.js';
 
 export default function Dashboard(P){
 const{session,profile,abs,go,logout,refresh,ct,enr}=P;
@@ -20,6 +21,14 @@ const absChips=abs.map((a,i)=>({a,t:(a.status==="Accepted"?absLabel(a):"Abstract
 const accN=abs.filter(a=>a.status==="Accepted").length;
 const ref=String(profile.id).replace(/-/g,"").slice(0,6).toUpperCase();
 const needPay=!profile.proof_path||profile.status==="Rejected";
+// Once an abstract is accepted, its fee form(s) take the place of the registration payment form (abstracts can only be submitted by approved delegates)
+const accAbs=abs.filter(a=>a.status==="Accepted"),showReg=needPay&&(accAbs.length===0||profile.status==="Rejected");
+const feeBox=(a,body)=>h`<div class="item" key=${a.id} style="margin-bottom:16px"><p class="ab-lbl" style="margin:0 0 4px">${absRef(a.ref_no)}</p><b>${a.title}</b><div class="meta">${a.discipline}, ${a.category}</div><div style="margin-top:12px">${body}</div></div>`;
+const feeSec=accAbs.length?h`<section class="dsec" id="abstract-fees"><h3>${accAbs.length>1?"Abstract fees: "+accAbs.length+" accepted abstracts":"Abstract fee payment"}</h3>${accAbs.length>1&&h`<p class="mut" style="font-size:.9rem;margin:0 0 10px">Each accepted abstract has its own PKR ${ABS_FEE} fee. Submit the payment details for each one separately.</p>`}${accAbs.map(a=>
+ a.fee_status==="Approved"?feeBox(a,h`<div class="ok" role="status">Payment of PKR ${a.fee_amount||ABS_FEE} confirmed. Thank you, this abstract is fully registered.</div>`)
+ :a.fee_status==="Pending"?feeBox(a,h`<div><div class="ok" role="status">Payment proof received. The team is verifying it.</div><dl class="kv"><dt>Amount</dt><dd>PKR ${a.fee_amount||ABS_FEE}</dd><dt>Transaction ID</dt><dd>${a.fee_tx_id}</dd><dt>Status</dt><dd><span class="badge Pending">Pending</span></dd></dl></div>`)
+ :!a.fee_link_at?feeBox(a,h`<p class="sub" style="margin:0">Your abstract is accepted. Payment is not open yet. The organizing team will open it shortly.</p>`)
+ :feeBox(a,h`<${AbstractFeeForm} a=${a} uid=${session.user.id} onDone=${refresh}/>`))}</section>`:null;
 const code=(f.amb||"").trim().toUpperCase();
 const checkCode=()=>{if(!code)return false;const ok=!!ambFind(code);setCv(ok);return ok};
 const copy=async(k,v)=>{try{await navigator.clipboard.writeText(v);setCpy(k);setTimeout(()=>setCpy(""),1800)}catch(e){}};
@@ -46,14 +55,15 @@ return h`<div class="dash">
 <p class="hint">${profile.status==="Approved"?h`Show this pass at the <b>registration desk</b> when you arrive.`:profile.status==="Rejected"?h`Upload a new payment proof below to get your pass.`:profile.proof_path?h`The team is verifying your payment. Your pass is confirmed once it is approved.`:h`Submit your payment details below to confirm your pass.`}</p>
 ${cd&&h`<div class="cd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${cd}</div>`}</div>
 </section>
-${needPay?h`<section class="dsec"><h3>${profile.status==="Rejected"?"Payment rejected: upload a new proof":"Complete your registration: payment"}</h3>
+${feeSec}
+${showReg?h`<section class="dsec"><h3>${profile.status==="Rejected"?"Payment rejected: upload a new proof":"Complete your registration: payment"}</h3>
 <div class="pf-sec"><p class="ab-lbl">Registration fee</p><div class="pf-grid">${FEES.map(([l,v,k])=>h`<div class=${"pf-card"+(k==="amb"?" dk":"")+((k==="smc"&&profile.smc)||(k==="non"&&!profile.smc)?" me":"")} key=${k}><span class="ab-ico sm"><${Ic} n=${k==="amb"?"heart":k==="pg"?"user":"users"}/></span><div><p class="ab-lbl">${l}</p><p class="ab-val">PKR ${v.toLocaleString("en-US")}</p>${((k==="smc"&&profile.smc)||(k==="non"&&!profile.smc))&&h`<span class="ab-pill">Your category</span>`}</div></div>`)}</div></div>
 <div class="pf-sec"><p class="ab-lbl">Send payment to</p><div class="pf-grid">${ACCTS.map(([b,n,o])=>h`<div class="pf-card acct" key=${n}><span class="ab-ico sm"><${Ic} n="phone"/></span><div class="pf-body"><p class="ab-lbl">${b}</p><p class="ab-val pf-num">${n}</p><p class="ab-txt">${o}</p></div><button type="button" class="btn o s" onClick=${()=>copy(n,n)}>${cpy===n?"Copied ✓":"Copy"}</button></div>`)}</div><p class="mut" style="font-size:.9rem;margin:10px 0 0">Pay the fee, then enter the transfer details below.</p></div>
 <div class="panel">${I("Transaction date & time","txd","datetime-local")}${I("Account name","acct")}<label>Amount (PKR)<input type="text" inputMode="decimal" autoComplete="off" value=${f.amt||""} onInput=${e=>{e.target.value=num(e.target.value);set("amt")(e)}}/></label>${I("Transaction ID","tid")}
 <label>Ambassador Code (optional)<div class="amb-in"><input value=${f.amb||""} placeholder="Enter code if you have one" autoComplete="off" onInput=${e=>{set("amb")(e);setCv(null)}}/>${code&&h`<button type="button" class="btn o s" disabled=${cbusy} onClick=${checkCode}>${cbusy?"Checking...":"Verify"}</button>`}${cv===true&&h`<span class="amb-ok" role="status" aria-label="Code valid">✓</span>`}</div>${cv===true&&h`<span class="amb-msg ok">Valid code. The ambassador fee of PKR 800 applies.</span>`}${cv===false&&h`<span class="amb-msg bad">Code not recognised.</span>`}</label>
 <label>Payment proof (image or PDF, max 5 MB)<input type="file" accept="image/*,.pdf" onChange=${e=>setFile(e.target.files[0]||null)}/></label>
 ${err&&h`<div class="err" role="alert">${err}</div>`}<button class="btn block" disabled=${busy} onClick=${pay}>${busy?"Uploading...":"Submit payment"}</button></div></section>`
-:h`<section class="dsec"><h3>Payment</h3><div class="item"><dl class="kv"><dt>Amount</dt><dd>PKR ${profile.amount}</dd><dt>Transaction ID</dt><dd>${profile.tx_id}</dd><dt>Status</dt><dd><span class=${"badge "+profile.status}>${profile.status}</span></dd></dl>${profile.status==="Pending"?h`<p class="mut" style="margin:10px 0 0;font-size:.9rem">Proof received. The team is verifying it.</p>`:""}</div></section>`}
+:(needPay?null:h`<section class="dsec"><h3>Payment</h3><div class="item"><dl class="kv"><dt>Amount</dt><dd>PKR ${profile.amount}</dd><dt>Transaction ID</dt><dd>${profile.tx_id}</dd><dt>Status</dt><dd><span class=${"badge "+profile.status}>${profile.status}</span></dd></dl>${profile.status==="Pending"?h`<p class="mut" style="margin:10px 0 0;font-size:.9rem">Proof received. The team is verifying it.</p>`:""}</div></section>`)}
 <section class="dsec"><h3>My workshops</h3>${(enr||[]).length?(enr||[]).map(e=>{
  const w=(ct.workshops||[]).find(x=>x.id===e.workshop_id)||{},ok=e.status==="Approved",no=e.status==="Rejected",
  tno=String(e.id).replace(/-/g,"").slice(0,8).toUpperCase(),
@@ -72,5 +82,5 @@ ${ok?h`<span class="tkt-bars" aria-hidden="true"></span><p class="tkt-note">Admi
  return h`<div class=${"item astat "+st.replace(/ /g,"")} key=${a.id}><b>${a.title}</b><div class="meta">${a.discipline}, ${a.category}</div>${st==="Accepted"&&h`<span class="badge Accepted" style="margin-top:6px">${absLabel(a)}</span>`}
 <ol class="trk" aria-label="Abstract progress">${steps.map((x,i)=>h`<li key=${x} class=${(i<at||(i==at&&st!=="Submitted"&&st!=="Under Review")?"done ":"")+(i==at?"cur":"")}><i aria-hidden="true">${i<at||(i==at&&(st==="Accepted"||st==="Rejected"))?(st==="Rejected"&&i==at?"✕":"✓"):i+1}</i><span>${x==="Accepted"?absLabel(a):x}</span></li>`)}</ol>
 <p class="amsg" role="status">${msg}</p>
-${st==="Accepted"&&h`<div style="margin-top:10px"><p class="mut" style="font-size:.9rem;margin:0 0 8px">${absRef(a.ref_no)} · Printing & setup fee: <span class=${"badge "+(a.fee_status==="Approved"?"Accepted":a.fee_status==="Rejected"?"Rejected":a.fee_status==="Pending"?"Pending":"Submitted")}>${a.fee_status==="Unpaid"?(a.fee_link_at?"PKR "+ABS_FEE+" due":"Link coming soon"):a.fee_status}</span></p>${a.fee_link_at&&a.fee_status!=="Approved"&&a.fee_status!=="Pending"&&h`<button class="btn s" onClick=${()=>go(absSlug(a.ref_no))}>${a.fee_status==="Rejected"?"Upload new payment proof":"Pay PKR "+ABS_FEE+" fee"}</button>`}</div>`}</div>`}):h`<p class="empty">You have not submitted an abstract yet. Submit one to see its acceptance status here.</p>`}
+${st==="Accepted"&&h`<div style="margin-top:10px"><p class="mut" style="font-size:.9rem;margin:0 0 8px">${absRef(a.ref_no)} · Printing & setup fee: <span class=${"badge "+(a.fee_status==="Approved"?"Accepted":a.fee_status==="Rejected"?"Rejected":a.fee_status==="Pending"?"Pending":"Submitted")}>${a.fee_status==="Unpaid"?(a.fee_link_at?"PKR "+ABS_FEE+" due":"Link coming soon"):a.fee_status}</span></p></div>`}</div>`}):h`<p class="empty">You have not submitted an abstract yet. Submit one to see its acceptance status here.</p>`}
 ${ABS_OPEN&&h`<button class="btn" onClick=${()=>go("abstracts")}>New abstract</button>`}</section></div>`}
