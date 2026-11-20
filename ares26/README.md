@@ -53,3 +53,18 @@ Uses Resend (resend.com). Install the Supabase CLI, then:
 - **Abstract submission:** only people with an **Approved** registration (account verified, fee paid) can submit an abstract. Run `supabase/abstracts_approved.sql` once in the SQL Editor (already included at the bottom of `schema.sql` for new installs) so the rule is enforced in the database too, not just on the page.
 - **Abstract printing & setup fee (PKR 500):** run `supabase/abstract_fee.sql` once in the SQL Editor (after `abstracts_approved.sql`). Every abstract gets a reference number (from 1001). Use **Admin > Abstract fees**: every **Accepted** abstract is listed there. Click **Generate link** (or **Generate all missing links**) to open the payment page `/ares26/#abstract-submission-<number>` for that author, then send it with **Copy link**, **WhatsApp** or **Email**. The page stays closed until you generate the link, and **Close link** shuts it again. The author logs in, opens the link and uploads the transfer proof; you then **Approve fee** / **Reject fee** in the same tab. Re-run `abstract_fee.sql` if you ran an earlier version. The page and database only allow payment for Accepted abstracts, and only by the abstract's owner. Change the amount in `ABS_FEE` in `src/shared.js`.
 
+## Email payment links to all accepted authors + download the acceptance list
+**One-time setup** (uses the same Resend account as the status emails):
+1. Run `supabase/abstract_fee_email.sql` once in the SQL Editor (after `abstract_fee.sql`). It adds the "emailed at" column.
+2. Deploy the function: `supabase functions deploy send-fee-emails`
+   (if sending says *Invalid JWT*, deploy with `--no-verify-jwt`; the function still checks that the caller is an admin itself).
+3. Make sure the secrets exist: `supabase secrets set RESEND_API_KEY=... MAIL_FROM="ARES’26 <noreply@yourdomain.com>"`. Optional: `REPLY_TO=you@example.com`, and `SITE_URL=https://yoursite.com/ares26/` to force the address used in the links.
+
+**Using it:** Admin > **Abstract fees** > **Email payment links**.
+- **Send test to me** emails you one sample first.
+- **Email N authors** sends the fee link to every author with an *Accepted* abstract that has not paid yet, one email per author (several accepted abstracts = several links in one email). Missing payment links are generated automatically. It skips fees already Pending/Approved and anyone already emailed, unless you tick **Include already emailed**.
+- Each abstract card also has **Send email / Resend email**, and the card shows when it was emailed.
+
+**Download list:** Admin > **Abstracts** > **Download this list as CSV** (follows the status filter), or Admin > **Export** > *Download abstracts CSV with acceptance*. The CSV has an **Acceptance** column (Accepted / Rejected / Pending), plus ref no, category, presenting author, fee link/emailed/fee status columns.
+
+Note: the hard-coded late abstract in `EXTRA_ABS` (`src/shared.js`) has no account or email in the database, so it appears in the CSV but can't be emailed.
