@@ -17,6 +17,7 @@ const payable=a=>!!a.ref_no&&!!a.user_id&&(a.fee_status==="Unpaid"||a.fee_status
 const hasMail=a=>!!(a.profiles&&a.profiles.email);
 const todo=acc.filter(a=>payable(a)&&hasMail(a)&&(inc||!a.fee_email_sent_at));
 const authors=new Set(todo.map(a=>a.profiles.email.trim().toLowerCase())).size;
+const multi=authors<todo.length;
 const noMail=acc.filter(a=>payable(a)&&!hasMail(a)).length;
 const sentN=acc.filter(a=>a.fee_email_sent_at).length;
 const when=d=>new Date(d).toLocaleString("en-GB");
@@ -29,9 +30,9 @@ const send=async(opts,done)=>{setMailing(true);
  if(data&&data.updated&&data.updated.length){const m={};data.updated.forEach(u=>{m[u.id]=u});setAbss(prev=>prev.map(r=>m[r.id]?{...r,fee_link_at:m[r.id].fee_link_at,fee_email_sent_at:m[r.id].fee_email_sent_at}:r))}
  const bad=(data&&data.failed)||[],skip=(data&&data.skipped)||[];
  if(bad.length||skip.length)window.alert("Sent "+data.sent+" email"+(data.sent==1?"":"s")+" ("+data.abstracts+" abstract"+(data.abstracts==1?"":"s")+").\n"+(bad.length?"\nFAILED:\n"+bad.map(x=>x.email+": "+x.error).join("\n"):"")+(skip.length?"\nSKIPPED:\n"+skip.map(x=>x.ref+": "+x.reason).join("\n"):""));
- else flash(data&&data.sent?done||("Emailed "+data.sent+" author"+(data.sent==1?"":"s")):"Nothing to send.")};
+ else flash(data&&data.sent?done||("Sent "+data.sent+" email"+(data.sent==1?"":"s")):"Nothing to send.")};
 const sendAll=()=>{if(!todo.length)return;
- if(!window.confirm("Email the payment link to "+authors+" author"+(authors==1?"":"s")+" ("+todo.length+" accepted abstract"+(todo.length==1?"":"s")+")?\n\nLinks that are not generated yet will be generated first. Each author gets one email."))return;
+ if(!window.confirm("Send "+todo.length+" payment-link email"+(todo.length==1?"":"s")+" to "+authors+" author"+(authors==1?"":"s")+"?\n\nEvery accepted abstract gets its own email and link"+(multi?" (an author with 2 accepted abstracts receives 2 emails)":"")+". Links that are not generated yet will be generated first."))return;
  send({ids:todo.map(a=>a.id),resend:inc})};
 const sendOne=a=>{if(a.fee_email_sent_at&&!window.confirm(absRef(a.ref_no)+" was already emailed on "+when(a.fee_email_sent_at)+". Send it again?"))return;
  send({ids:[a.id],resend:true},"Emailed "+a.profiles.email)};
@@ -53,8 +54,8 @@ const mail=a=>a.profiles&&a.profiles.email?"mailto:"+a.profiles.email+"?subject=
 
 return h`<div><p class="mut">Only <b>Accepted</b> abstracts appear here. Generate a payment link to open the page for that author, email it to them (one click for everyone below, or per abstract), then approve their PKR ${ABS_FEE} fee once you have checked the proof. Until you generate the link, the page stays closed even if someone has the address.</p>
 <div class="card" style="margin-bottom:14px"><b>Email payment links</b>
-<p class="mut" style="font-size:.88rem;margin:6px 0 10px">Sends every author with an Accepted abstract their PKR ${ABS_FEE} fee link, one email per author. Missing links are generated automatically. Abstracts whose fee is already paid or under review are skipped.</p>
-<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" disabled=${!todo.length||mailing||!!busy} onClick=${sendAll}>${mailing?"Sending...":"Email "+authors+" author"+(authors==1?"":"s")+" ("+todo.length+" abstract"+(todo.length==1?"":"s")+")"}</button><button class="btn o s" disabled=${mailing} onClick=${sendTest}>Send test to me</button>
+<p class="mut" style="font-size:.88rem;margin:6px 0 10px">Sends a PKR ${ABS_FEE} fee link for every Accepted abstract, one email per abstract (an author with 2 accepted abstracts gets 2 separate emails). Missing links are generated automatically. Abstracts whose fee is already paid or under review are skipped.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" disabled=${!todo.length||mailing||!!busy} onClick=${sendAll}>${mailing?"Sending...":"Send "+todo.length+" email"+(todo.length==1?"":"s")+" ("+authors+" author"+(authors==1?"":"s")+")"}</button><button class="btn o s" disabled=${mailing} onClick=${sendTest}>Send test to me</button>
 <label style="display:flex;gap:6px;align-items:center;margin:0;cursor:pointer;font-size:.88rem"><input type="checkbox" style="width:auto;margin:0" checked=${inc} onChange=${e=>setInc(e.target.checked)}/>Include already emailed</label></div>
 <p class="mut" style="font-size:.85rem;margin:10px 0 0">Emailed so far: <b>${sentN}</b> of ${acc.length} accepted.${noMail?" "+noMail+" accepted abstract"+(noMail==1?" has":"s have")+" no email address and can't be emailed.":""}</p></div>
 <div class="g c5" style="margin-bottom:14px">${[["Accepted",acc.length],["No link yet",n("No link yet")],["Awaiting payment",n("Awaiting payment")],["Proof to review",n("Proof to review")],["Approved",n("Approved")]].map(([l,v])=>h`<div class="card" key=${l}><b style="font-size:1.4rem">${v}</b><div class="mut" style="font-size:.85rem">${l}</div></div>`)}</div>

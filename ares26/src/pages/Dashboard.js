@@ -15,8 +15,9 @@ const evText=isNaN(evDate)?ev[0]:evDate.toLocaleDateString("en-GB",{day:"numeric
 const days=isNaN(evDate)?null:Math.ceil((evDate-new Date())/864e5);
 const cd=days===null?"":days>1?days+" days to go":days==1?"Tomorrow":days==0?"Today":"Event has passed";
 const regLabel=profile.status==="Approved"?"Registered":profile.status==="Rejected"?"Payment rejected":profile.proof_path?"Payment under verification":"Payment required";
-const a0=abs[0];
-const absChip=a0?(a0.status==="Accepted"?absLabel(a0):"Abstract "+a0.status.toLowerCase()):"";
+// One chip per abstract, so an author with several accepted abstracts sees each of them (with its reference number)
+const absChips=abs.map((a,i)=>({a,t:(a.status==="Accepted"?absLabel(a):"Abstract "+a.status.toLowerCase())+(abs.length>1?" · "+(a.ref_no?absRef(a.ref_no):"#"+(i+1)):"")}));
+const accN=abs.filter(a=>a.status==="Accepted").length;
 const ref=String(profile.id).replace(/-/g,"").slice(0,6).toUpperCase();
 const needPay=!profile.proof_path||profile.status==="Rejected";
 const code=(f.amb||"").trim().toUpperCase();
@@ -39,7 +40,7 @@ return h`<div class="dash">
 <div class="pass-top"><div class="lg"><img src=${LOGO} alt="ARES’26"/></div>
 <p class="lbl">Delegate pass</p><h2 class="nm">${profile.first_name} ${profile.last_name}</h2>
 <p class="inst">${profile.institution}${profile.programme?" — "+profile.programme:""}</p>
-<div class="chips"><span class=${"chip "+profile.status}>${regLabel}</span>${absChip&&h`<span class=${"chip"+(a0.status==="Accepted"?" Approved":a0.status==="Rejected"?" Rejected":"")}>${absChip}</span>`}</div></div>
+<div class="chips"><span class=${"chip "+profile.status}>${regLabel}</span>${absChips.map(c=>h`<span key=${c.a.id} class=${"chip"+(c.a.status==="Accepted"?" Approved":c.a.status==="Rejected"?" Rejected":"")}>${c.t}</span>`)}</div></div>
 <div class="pass-bot"><p class="when">${evText}</p><p class="where">Sargodha Medical College, Sargodha</p>
 <p class="ref">Registration ID</p><p class="refn">${ref}</p>
 <p class="hint">${profile.status==="Approved"?h`Show this pass at the <b>registration desk</b> when you arrive.`:profile.status==="Rejected"?h`Upload a new payment proof below to get your pass.`:profile.proof_path?h`The team is verifying your payment. Your pass is confirmed once it is approved.`:h`Submit your payment details below to confirm your pass.`}</p>
@@ -66,7 +67,7 @@ ${err&&h`<div class="err" role="alert">${err}</div>`}<button class="btn block" d
 <div><p class="tkt-lbl">Ticket no.</p><p class="tkt-no">${tno}</p></div>
 ${ok?h`<span class="tkt-bars" aria-hidden="true"></span><p class="tkt-note">Admit one. Show at the workshop desk.</p>`:h`<p class="tkt-note">${no?"Contact the organizing team if you think this is a mistake.":"The team will confirm your seat soon."}</p>`}</div></article>`}):h`<p class="empty">${profile.status==="Approved"?"You have not enrolled in a workshop yet. Pick one to request your ticket.":"Workshop enrolment opens once your registration is approved."}</p>`}
 <button class="btn o" onClick=${()=>go("workshops")}>${(enr||[]).length?"Browse workshops":"See workshops"}</button></section>
-<section class="dsec"><h3>Abstract acceptance status</h3>${abs.length?abs.map(a=>{const st=a.status,steps=["Submitted","Under Review",st==="Rejected"?"Rejected":"Accepted"],at=steps.indexOf(st),
+<section class="dsec"><h3>Abstract acceptance status</h3>${accN>1&&h`<p class="mut" style="font-size:.9rem;margin:0 0 10px">You have ${accN} accepted abstracts. Each one has its own reference number, payment link and PKR ${ABS_FEE} printing & setup fee, shown separately below.</p>`}${abs.length?abs.map(a=>{const st=a.status,steps=["Submitted","Under Review",st==="Rejected"?"Rejected":"Accepted"],at=steps.indexOf(st),
  msg=st==="Accepted"?"Congratulations! Your abstract has been accepted for "+(String(a.category).toLowerCase()==="poster"?"poster":"oral")+" presentation. Further instructions will be shared with you.":st==="Rejected"?"Unfortunately your abstract was not accepted this time. Thank you for submitting, and we hope to see you at ARES’26.":st==="Under Review"?"Your abstract is being reviewed by the scientific committee.":"We received your abstract. It will be reviewed soon.";
  return h`<div class=${"item astat "+st.replace(/ /g,"")} key=${a.id}><b>${a.title}</b><div class="meta">${a.discipline}, ${a.category}</div>${st==="Accepted"&&h`<span class="badge Accepted" style="margin-top:6px">${absLabel(a)}</span>`}
 <ol class="trk" aria-label="Abstract progress">${steps.map((x,i)=>h`<li key=${x} class=${(i<at||(i==at&&st!=="Submitted"&&st!=="Under Review")?"done ":"")+(i==at?"cur":"")}><i aria-hidden="true">${i<at||(i==at&&(st==="Accepted"||st==="Rejected"))?(st==="Rejected"&&i==at?"✕":"✓"):i+1}</i><span>${x==="Accepted"?absLabel(a):x}</span></li>`)}</ol>

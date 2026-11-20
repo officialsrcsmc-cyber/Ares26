@@ -1,5 +1,5 @@
 // ADMIN ONLY: emails every author with an Accepted abstract their private PKR fee-payment link.
-// - One email per author (an author with several accepted abstracts gets all their links in one email).
+// - One email PER ABSTRACT: an author with several accepted abstracts gets a separate email (with its own link) for each.
 // - Skips abstracts whose fee is already Pending/Approved, and (unless resend=true) ones already emailed.
 // - Generates the payment link (fee_link_at) first if it has not been generated yet.
 // Needs the same Resend setup as status-email (RESEND_API_KEY, MAIL_FROM). Setup steps are in README.md.
@@ -18,23 +18,23 @@ const ref = (n: number | string) => "ARES26-ABS-" + n;
 
 type Item = { ref: string; title: string; category: string; link: string };
 
-function build(name: string, items: Item[], fee: number) {
-  const many = items.length > 1;
-  const subject = "ARES'26: your abstract is accepted - fee payment link";
+function build(name: string, i: Item, fee: number) {
+  const subject = `ARES'26: your abstract is accepted - fee payment link (${i.ref})`;
   const html =
     `<p>Hello ${esc(name || "there")},</p>` +
-    `<p>Congratulations! Your abstract${many ? "s have" : " has"} been <b>accepted</b> for ARES'26 at Sargodha Medical College.</p>` +
-    `<ul>${items.map((i) =>
-      `<li><b>${esc(i.title)}</b><br/>${esc(i.ref)} &middot; ${esc(i.category)} presentation<br/>` +
-      `Payment link: <a href="${esc(i.link)}">${esc(i.link)}</a></li>`).join("")}</ul>` +
-    `<p>To complete your submission, please pay the <b>PKR ${esc(fee)}</b> printing and setup fee and upload your payment receipt using the link${many ? " for each abstract" : ""} above. ` +
+    `<p>Congratulations! Your abstract has been <b>accepted</b> for ARES'26 at Sargodha Medical College.</p>` +
+    `<p><b>${esc(i.title)}</b><br/>${esc(i.ref)} &middot; ${esc(i.category)} presentation<br/>` +
+    `Payment link: <a href="${esc(i.link)}">${esc(i.link)}</a></p>` +
+    `<p>To complete your submission, please pay the <b>PKR ${esc(fee)}</b> printing and setup fee and upload your payment receipt using the link above. ` +
     `You will need to log in to the account you used to submit the abstract.</p>` +
+    `<p>If you have more than one accepted abstract, you will receive a separate email and payment link for each one.</p>` +
     `<p>Regards,<br/>ARES'26 Organizing Committee<br/>Sargodha Medical College</p>`;
   const text =
-    `Hello ${name || "there"},\n\nCongratulations! Your abstract${many ? "s have" : " has"} been accepted for ARES'26 at Sargodha Medical College.\n\n` +
-    items.map((i) => `${i.title}\n${i.ref} - ${i.category} presentation\nPayment link: ${i.link}`).join("\n\n") +
-    `\n\nTo complete your submission, please pay the PKR ${fee} printing and setup fee and upload your payment receipt using the link${many ? " for each abstract" : ""} above. ` +
-    `You will need to log in to the account you used to submit the abstract.\n\nRegards,\nARES'26 Organizing Committee\nSargodha Medical College`;
+    `Hello ${name || "there"},\n\nCongratulations! Your abstract has been accepted for ARES'26 at Sargodha Medical College.\n\n` +
+    `${i.title}\n${i.ref} - ${i.category} presentation\nPayment link: ${i.link}` +
+    `\n\nTo complete your submission, please pay the PKR ${fee} printing and setup fee and upload your payment receipt using the link above. ` +
+    `You will need to log in to the account you used to submit the abstract.\n\n` +
+    `If you have more than one accepted abstract, you will receive a separate email and payment link for each one.\n\nRegards,\nARES'26 Organizing Committee\nSargodha Medical College`;
   return { subject, html, text };
 }
 
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
 
     // 3. Test mode: one sample email to the admin who clicked, nothing is saved
     if (body.test === true) {
-      const m = build(me.first_name || "Admin", [{ ref: ref(1001), title: "Sample abstract title", category: "Oral", link: linkFor(1001) }], fee);
+      const m = build(me.first_name || "Admin", { ref: ref(1001), title: "Sample abstract title", category: "Oral", link: linkFor(1001) }, fee);
       const r = await sendBatch([{ from, to: [me.email], subject: "[TEST] " + m.subject, html: m.html, text: m.text, reply_to }]);
       return r.ok ? json({ test: true, to: me.email }) : json({ error: "Resend refused the test email: " + r.text.slice(0, 300) }, 502);
     }
@@ -91,21 +91,20 @@ Deno.serve(async (req) => {
     const { data: rows, error: qe } = await q;
     if (qe) return json({ error: qe.message }, 500);
 
+    // One entry per abstract (NOT per author): an author with 2 accepted abstracts gets 2 emails
     const skipped: { ref: string; reason: string }[] = [];
-    const groups = new Map<string, { name: string; email: string; rows: any[] }>();
+    const list: { name: string; email: string; row: any }[] = [];
     for (const r of rows || []) {
       const p: any = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
       const email = String(p?.email || "").trim();
       if (!email) { skipped.push({ ref: ref(r.ref_no), reason: "no email on the author's account" }); continue; }
-      const k = email.toLowerCase();
-      if (!groups.has(k)) groups.set(k, { name: String(p.first_name || "").trim(), email, rows: [] });
-      groups.get(k)!.rows.push(r);
+      list.push({ name: String(p.first_name || "").trim(), email, row: r });
     }
-    if (!groups.size) return json({ sent: 0, abstracts: 0, failed: [], skipped, updated: [] });
+    if (!list.length) return json({ sent: 0, abstracts: 0, failed: [], skipped, updated: [] });
 
     // 5. Generate any missing payment links first (the page stays closed until fee_link_at is set)
     const now = new Date().toISOString();
-    const all = [...groups.values()].flatMap((g) => g.rows);
+    const all = list.map((g) => g.row);
     const need = all.filter((r) => !r.fee_link_at).map((r) => r.id);
     if (need.length) {
       const { error } = await sb.from("abstracts").update({ fee_link_at: now }).in("id", need);
@@ -113,24 +112,24 @@ Deno.serve(async (req) => {
       for (const r of all) if (!r.fee_link_at) r.fee_link_at = now;
     }
 
-    // 6. Send in batches of 50; mark each abstract as emailed only after Resend accepts its batch
+    // 6. Send in batches of 50 emails; mark each abstract as emailed only after Resend accepts its batch
     const failed: { email: string; error: string }[] = [];
     const updated: { id: string; fee_link_at: string; fee_email_sent_at: string }[] = [];
-    const list = [...groups.values()];
     let sent = 0, abstracts = 0;
     for (let i = 0; i < list.length; i += 50) {
       const chunk = list.slice(i, i + 50);
       const payload = chunk.map((g) => {
-        const m = build(g.name, g.rows.map((r) => ({ ref: ref(r.ref_no), title: r.title, category: r.category, link: linkFor(r.ref_no) })), fee);
+        const r = g.row;
+        const m = build(g.name, { ref: ref(r.ref_no), title: r.title, category: r.category, link: linkFor(r.ref_no) }, fee);
         return { from, to: [g.email], subject: m.subject, html: m.html, text: m.text, reply_to };
       });
       const r = await sendBatch(payload);
-      if (!r.ok) { for (const g of chunk) failed.push({ email: g.email, error: r.text.slice(0, 200) }); continue; }
-      const doneIds = chunk.flatMap((g) => g.rows.map((x) => x.id));
+      if (!r.ok) { for (const g of chunk) failed.push({ email: `${g.email} (${ref(g.row.ref_no)})`, error: r.text.slice(0, 200) }); continue; }
+      const doneIds = chunk.map((g) => g.row.id);
       const { error } = await sb.from("abstracts").update({ fee_email_sent_at: now }).in("id", doneIds);
       if (error) failed.push({ email: "(saving sent-time)", error: "Emails were sent but could not be marked as sent: " + error.message });
       sent += chunk.length; abstracts += doneIds.length;
-      for (const g of chunk) for (const x of g.rows) updated.push({ id: x.id, fee_link_at: x.fee_link_at, fee_email_sent_at: now });
+      for (const g of chunk) updated.push({ id: g.row.id, fee_link_at: g.row.fee_link_at, fee_email_sent_at: now });
     }
     return json({ sent, abstracts, failed, skipped, updated });
   } catch (e) {

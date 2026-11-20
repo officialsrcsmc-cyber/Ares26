@@ -62,9 +62,23 @@ Uses Resend (resend.com). Install the Supabase CLI, then:
 
 **Using it:** Admin > **Abstract fees** > **Email payment links**.
 - **Send test to me** emails you one sample first.
-- **Email N authors** sends the fee link to every author with an *Accepted* abstract that has not paid yet, one email per author (several accepted abstracts = several links in one email). Missing payment links are generated automatically. It skips fees already Pending/Approved and anyone already emailed, unless you tick **Include already emailed**.
+- **Email N authors** sends the fee link to every author with an *Accepted* abstract that has not paid yet, one email per abstract (an author with 2 accepted abstracts gets 2 separate emails, each with its own link). Missing payment links are generated automatically. It skips fees already Pending/Approved and anyone already emailed, unless you tick **Include already emailed**.
 - Each abstract card also has **Send email / Resend email**, and the card shows when it was emailed.
 
 **Download list:** Admin > **Abstracts** > **Download this list as CSV** (follows the status filter), or Admin > **Export** > *Download abstracts CSV with acceptance*. The CSV has an **Acceptance** column (Accepted / Rejected / Pending), plus ref no, category, presenting author, fee link/emailed/fee status columns.
 
 Note: the hard-coded late abstract in `EXTRA_ABS` (`src/shared.js`) has no account or email in the database, so it appears in the CSV but can't be emailed.
+
+## Email reminders to people who have not paid the conference registration (but submitted an abstract)
+**One-time setup** (same Resend account and secrets as above):
+1. Run `supabase/dues_email.sql` once in the SQL Editor. It adds `dues_email_sent_at` / `dues_email_count` to `profiles`.
+2. Deploy the function: `supabase functions deploy send-dues-emails` (add `--no-verify-jwt` if sending says *Invalid JWT*; the function still checks the caller is an admin).
+
+**Using it:** Admin > **Registrations** > **Email registration payment reminders**.
+- Targets everyone who has **submitted an abstract** (Submitted, Under Review or Accepted) and whose registration is **not Approved** with **no payment proof uploaded** (or the proof was **Rejected**).
+- Not emailed: people whose proof is uploaded and waiting for review, and authors whose abstracts were all Rejected.
+- One email per person listing their abstracts, with a link to their dashboard. **Send test to me**, **Show list** (with per-person Send/Resend) and **Include already reminded** are available. The Registrations CSV has a *Payment reminder emailed* column.
+
+## Several accepted abstracts under one email address
+- Each accepted abstract gets its own payment link and its own email.
+- The participant dashboard shows one chip on the delegate pass per abstract (with its ARES26-ABS number) and a separate acceptance + fee card for each abstract.
